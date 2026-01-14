@@ -1,0 +1,119 @@
+---
+title: "Predicting the Weather"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{=html}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(data.table)
+library(mosaic)
+library(DT)
+```
+
+## Rexburg Weather Prediction
+
+```{r}
+
+weather_hist <- read.csv("weather.csv")
+weather_hist <- rename(weather_hist, PrevBar = bar.1)
+weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
+
+p <- ggplot(weather_hist, aes(y=TempTwoAhead, x=Temp)) +
+  geom_point(color="lightgray") +
+  geom_smooth(method="lm", se=F, formula=y~x, color="lightblue", fullrange=TRUE) +
+  geom_point(aes(x=32, y=28.33), color="skyblue3") +
+  geom_text(aes(x=26.7, y=28.33),label="28\u00B0F January 12th, 2025", color="skyblue3") +
+  labs(
+    title = "Predicted Weather for Rexburg on January 12th",
+    x = "High Temperature in \u00B0F Two Days Before with Similar Conditions",
+  y = "High Temperature in \u00B0F"
+  ) +
+  theme_minimal()
+p
+```
+
+## Technical Details
+
+### Data Collection
+
+The data was collected from [timeanddate.com](https://www.timeanddate.com/weather/@5605242/historic?month=12&year=2022) using only days with Northerly winds of a similar speed where the air pressure increased from the day before to match the conditions of January 10th 2026. The x value uses the temperature of a given day, $X$, and two days later, $Y$, to predict the temperature two days ahead.
+
+```{r}
+# datatable
+datatable(weather_hist, options=list(lengthMenu = c(5,10,30)), extensions="Responsive")
+```
+
+## Regression Hypothesis
+
+We fit a linear regression model to the weather data.
+
+$$
+  \underbrace{Y_i}_\text{Temperature} = \overbrace{\beta_0}^\text{y-int} + \overbrace{\beta_1}^\text{slope} \underbrace{X_i}_\text{Temperature Two Days Before} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0, \sigma^2)
+$$ The null hypothesis for the analysis is that the slope is zero; there is not a real relationship between the barometric pressure and the temperature in Rexburg. The alternative hypothesis is that slope is not zero; there is in actuality a relationship between the barometric pressure and the temperature. The level of significance for the study will be 0.05.
+
+$$
+  H_0: \beta_1 = 0
+$$
+
+$$
+  H_a: \beta_1 \neq 0
+$$
+
+$$
+  \alpha = 0.05
+$$
+
+```{r}
+
+
+mylm <- lm(TempTwoAhead ~ Temp, data=weather_hist)
+summary(mylm)
+
+```
+
+## Assumptions
+
+It's difficult to tell with few data points, but the Residuals versus Fitted-Values plot may show a non-linear relationship. The Q-Q Plot of the Residuals may not be normal, and with so few points it's difficult to tell whether the Residuals versus Order Plot has patterns, so the independence of the error terms is undetermined. These plots would indicate that the model is questionable.
+
+```{r}
+par(mfrow=c(1,3))
+plot(mylm, which = 1:2)
+plot(mylm$residuals)
+```
+
+## Model
+
+The fitted model is below.
+
+$$
+  \underbrace{\hat{Y}_i}_\text{Mean Temperature} = \overbrace{7.1479}^\text{est. y-int} + \overbrace{0.6622}^\text{est. slope} \underbrace{X_i}_\text{Temp Two Days Before}
+$$
+
+The y-intercept for the mean temperature is 30.6236. For every point of barometric pressure, the mean Temperature decreases by -0.095 degrees Fahrenheit. The p-value for the slope is less than 0.05; therefore there is sufficient evidence to reject the null hypothesis that their is no relationship between barometric pressure and temperature.
+
+$$p =  0.0344  <  \alpha = 0.05$$
+
+## Prediction
+
+```{r}
+# info for January 10th Jan 10 bar-1 is 29.95 bar 30.8 Temp 32 Wind N WindSpeed 6.836 
+pred <- predict(mylm, data.frame(Temp=32))
+```
+
+When the temperature from January 10th, 32 degrees, is put into the model, it predicts a high temperature of `{r} round(pred,0)` degrees (rounded to the nearest degree) for January 12th, 2026.
+
+$$
+7.1479 + 0.6622(32) = 28.3385264
+$$
+
+```{}
+```
