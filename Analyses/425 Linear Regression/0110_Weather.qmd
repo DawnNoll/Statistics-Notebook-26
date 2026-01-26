@@ -23,7 +23,7 @@ library(DT)
 
 ```{r}
 
-weather_hist <- read.csv("weather.csv")
+weather_hist <- read.csv("0110_Weather.csv")
 weather_hist <- rename(weather_hist, PrevBar = bar.1)
 weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
 

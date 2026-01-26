@@ -1,0 +1,45 @@
+---
+title: "Residuals"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(tidyverse) 
+library(data.table) 
+library(mosaic) 
+library(DT)
+
+weather_hist <- read.csv("weather.csv")
+weather_hist <- rename(weather_hist, PrevBar = bar.1)
+weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
+```
+
+Terms such as residuals, sum of squares, and R-squared are explained using nte data collected from [timeanddate.com](https://www.timeanddate.com/weather/@5605242/historic?month=12&year=2022) below.
+
+`{r} # datatable datatable(weather_hist, options=list(lengthMenu = c(5,10,30)), extensions="Responsive")}`
+
+## Residuals
+
+Residuals are always in a vertical direction (not horizontal). It's always vertical because the x is not changing.
+
+The pink dot is $b_0 + b_1$ or $Y_i$, $r_i = Y_i - \hat{Y_i}$ – we believe our prediction is correct, but the weather (actual) is wrong. It represents a point our estimated line (lm). On the tool, the more we can get the line in the middle the less less the residuals are, so for a lm the sum of the residuals will always be 0. The residuals can be found with the code Y - mylm\$fit
+
+*Deterministic: if you know enough you could predict where the electron is. Stochastic: even if you know everything, you can't predict where the electron is.*
+
+## Sum of Squared Errors (SSE)
+
+The least squares regression line is the best fit line.
+
+Sum of Squared Errors measures how much the residuals deviate from the line. Equals SSTO-SSR and can be found using sum( (Y-mylm\$fit)\^2
+
+$$ SSE = \sum_{i=1}^{n}{(Y_i-\hat{Y_i})}^2 $$
+
+`{r} library(tidyverse)  cars2 <- cars %>%   filter(speed < 15)  mylm <- lm(dist ~ speed, data=cars2)   ggplot(cars2, aes(x=speed, y=dist)) +    geom_point() +    geom_smooth(method="lm", se=F, formula=y~x) +    geom_rect(aes(xmin=speed, xmax=speed + mylm$res*0.4, ymin=mylm$fit, ymax=dist), alpha=0.1, color="pink") +   geom_segment(aes(x=speed, xend=speed, y=dist, yend=mylm$fit), color="darkgray")}`
+
+\*Minimizing the quadratic is beautiful, that's why we like squares.\*
