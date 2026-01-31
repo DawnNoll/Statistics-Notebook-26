@@ -12,7 +12,7 @@ Question; Why is it SSE aren't the true errors unknown? Why isn't it the SSr?
 
 Residuals are always in a vertical direction (not horizontal). It's always vertical because the x is not changing.
 
-The pink dot is $b_0 + b_1$ or $Y_i$, $r_i = Y_i - \hat{Y_i}$ – we believe our prediction is correct, but the weather (actual) is wrong. It represents a point our estimated line (lm). On the tool, the more we can get the line in the middle the less less the residuals are, so for a lm the sum of the residuals will always be 0. The residuals can be found with the code Y - mylm\$fit
+The pink dot is $b_0 + b_1$ or $Y_i$, $r_i = Y_i - \hat{Y_i}$ – we believe our prediction is correct, but the weather (actual) is wrong. It represents a point our estimated line (lm). On the tool, the more we can get the line in the middle the less less the residuals are, so for an lm the sum of the residuals will always be 0 (if there is an intercept?). The residuals can be found with the code Y - mylm\$fit
 
 *Deterministic: if you know enough you could predict where the electron is. Stochastic: even if you know everything, you can't predict where the electron is.*
 

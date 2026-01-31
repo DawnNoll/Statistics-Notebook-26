@@ -1,5 +1,5 @@
 ---
-title: "Residuals"
+title: "Regression Theory"
 format:
   html:
     embed-resources: true
@@ -7,39 +7,289 @@ format:
 editor: visual
 ---
 
-```{r setup}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(tidyverse) 
-library(data.table) 
+library(data.table)
+library(latex2exp)
+library(ggbrace)
 library(mosaic) 
 library(DT)
 
-weather_hist <- read.csv("weather.csv")
-weather_hist <- rename(weather_hist, PrevBar = bar.1)
-weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
+theme_set(theme_minimal()) 
 ```
 
-Terms such as residuals, sum of squares, and R-squared are explained using nte data collected from [timeanddate.com](https://www.timeanddate.com/weather/@5605242/historic?month=12&year=2022) below.
+Basic terms of linear regression will be described using the data below which was collected from [timeanddate.com](#0).
 
-`{r} # datatable datatable(weather_hist, options=list(lengthMenu = c(5,10,30)), extensions="Responsive")}`
+```{r, data}
+weather_hist <- read.csv("0110_Weather.csv")
+weather_hist <- rename(weather_hist, PrevBar = bar.1)
+weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
+ybar <- mean(weather_hist$Temp)
+actual <- 39
+mylm <- lm(TempTwoAhead~Temp, data=weather_hist)
+y_edgex <-predict(mylm, data.frame(Temp=7))
 
-## Residuals
+# datatable 
+datatable(weather_hist, options=list(lengthMenu = c(3,10,30)), extensions="Responsive")
+```
 
-Residuals are always in a vertical direction (not horizontal). It's always vertical because the x is not changing.
+<br>
 
-The pink dot is $b_0 + b_1$ or $Y_i$, $r_i = Y_i - \hat{Y_i}$ – we believe our prediction is correct, but the weather (actual) is wrong. It represents a point our estimated line (lm). On the tool, the more we can get the line in the middle the less less the residuals are, so for a lm the sum of the residuals will always be 0. The residuals can be found with the code Y - mylm\$fit
+The plot below uses a regression on the temperature data, colored in gold, to predict the high temperature on January 12th, 2026.
 
-*Deterministic: if you know enough you could predict where the electron is. Stochastic: even if you know everything, you can't predict where the electron is.*
+```{r, baseplot}
+# create a base plot
+p <- ggplot(weather_hist, aes(y=TempTwoAhead, x=Temp)) +
+coord_cartesian(xlim = c(NA, 36)) +
+geom_hline(yintercept = ybar, color="darkgray") +
+geom_point(color="gold") +
+geom_smooth(method="lm", se=F, formula=y~x, color="lightblue", alpha=0.25, 
+            fullrange=TRUE) +
+scale_x_continuous(limits = c(min(weather_hist$Temp)-1, 36), expand = c(0, 0)) +
+annotate("point", x=32, y=28.33, color="dodgerblue4") +
+annotate("point", x=32, y=actual, color="orange") +
+annotate("text", x=33.2, y=28.8, 
+          label=TeX("$\\hat{Y} = 28^{\\circ}F$"), color="dodgerblue4",
+          size=3) +
+annotate("text", x=33.2, y=39.22, 
+          label=TeX("$Y_i = 39^{\\circ}F$"), color="darkorange",
+          size=3) +
+annotate("text", x=34.7, y=ybar-1.1, 
+          label=TeX("$\\bar{y}$"), color="gray60",
+          size=3) +
+labs(
+  title = "Predicted Weather for Rexburg on January 12th",
+  x = "High Temperature in \u00B0F Two Days Before with Similar Conditions",
+  y = "High Temperature in \u00B0F") #+
+ # coord_equal(ratio=1, ylim=ylim)
 
-## Sum of Squared Errors (SSE)
+p
+```
 
-The least squares regression line is the best fit line.
+The predicted high or $\hat{Y_i}$ is marked in dark blue, while the actual observed temperature, $Y_i$ , is marked in orange (because it was not used to create the regression). The subscript $i$ stands for individual. The regression line, $b_0 + b_1$, is marked in blue. The dark gray line marks $\bar{y}$, the mean of the data. The true line is unknown, so it is not on the plot.
 
-Sum of Squared Errors measures how much the residuals deviate from the line. Equals SSTO-SSR and can be found using sum( (Y-mylm\$fit)\^2
+<br>
+
+## Residual, $r_i$
+
+The dark blue dots represent the individual Y's estimated by the regression. It is assumed that the prediction of 28 degrees is correct, so the recorded high temperature for January 12th of 39 degrees is 11 degrees off.
+
+```{r, residualplot}
+p +
+geom_segment(aes(x=Temp, xend=Temp, y=TempTwoAhead, yend=mylm$fit), color="dodgerblue2") +
+annotate("segment", x=32, xend= 32, y=28.33, yend=actual, 
+          color="dodgerblue2") +
+stat_brace(
+  data = data.frame(x = c(32.2, 32.2), y = c(28.6, actual-0.3)), # Vertical span
+  aes(x, y),
+  rotate = 90, # 90 for vertical
+  color = "dodgerblue3",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.2, 32.2), y = c(28.6, actual-0.3)),
+  aes(x, y),
+  label = TeX("$r_i=11$"),
+  rotate = 90,
+  color = "dodgerblue2")
+```
+
+11 degrees is a residual. It's an error term representing how far the actual temperature ($Y_i$) is from the prediction ($\hat{Y_i})$ :
+
+$$
+r_i = Y_i-\hat{Y_i}
+$$
+
+<br>
+
+For an lm() the sum of the residuals will always be 0. Residuals are always in a vertical direction because the x is not changing. Residuals can be used to show the variation in $Y_i$ not explained by the regression. The residuals for the regression line in the plot above can be found with the code below.
+
+```{r, residual}
+#| code-fold: show
+# create an lm
+model <- lm(TempTwoAhead~Temp, data=weather_hist)
+# pull the residuals from the model object, showing 3 for neatness
+head(model$residuals,3)
+
+```
+
+<br>
+
+## Sum of Squared Errors, $SSE$
+
+The shaded regions below are squares with all sides the length of the corresponding residual.
+
+```{r, SSEplot}
+p +
+geom_point(aes(x=Temp, y=mylm$fit), color = "dodgerblue3") +
+geom_rect(aes(xmin=Temp, xmax=Temp - mylm$res*0.44, 
+              ymin=mylm$fit, ymax=TempTwoAhead), 
+          color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
+annotate("rect", xmin=32, xmax=32 - 11*0.44, ymin=28.33, ymax=39, 
+         color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)), # Vertical span
+  aes(x, y),
+  rotate = 90, # 90 for vertical
+  color = "dodgerblue3",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)),
+  aes(x, y),
+  label = TeX("$Y_i-\\hat{Y_i}$"),
+  rotate = 90,
+  color = "dodgerblue2") 
+
+# note: the square for the data point close to the left edge isn't showing because it's going off the edge of the lm's left-hand limit
+
+```
+
+Since adding the residuals will always equal 0, the sum of residuals is not useful for assessing fit. Squaring the residuals eliminates negative values, so the total error of the model can be calculated. This is called the Sum of Squared Errors (because a residual is an error term) and measures how well the observed values match the predicted values.
 
 $$ SSE = \sum_{i=1}^{n}{(Y_i-\hat{Y_i})}^2 $$
 
-`{r} library(tidyverse)  cars2 <- cars %>%   filter(speed < 15)  mylm <- lm(dist ~ speed, data=cars2)   ggplot(cars2, aes(x=speed, y=dist)) +    geom_point() +    geom_smooth(method="lm", se=F, formula=y~x) +    geom_rect(aes(xmin=speed, xmax=speed + mylm$res*0.4, ymin=mylm$fit, ymax=dist), alpha=0.1, color="pink") +   geom_segment(aes(x=speed, xend=speed, y=dist, yend=mylm$fit), color="darkgray")}`
+Squaring guarantees the SSE will never be negative, $SSE \ge 0$ . This measurement also allows comparison of different models on the same data. The least squares regression line (where the area of the squares is lowest) is the best fit line, so the lowest SSE is better when using the same data. Unfortunately, squaring also means SSE can be greatly skewed by outliers. SSE is the difference between the \>\>\>\> FIX sum of actual values and the average values\<\<\<\<, $SSE = SSTO-SSR$ .
 
-\*Minimizing the quadratic is beautiful, that's why we like squares.\*
+The code below calculates the SSE for the linear model of the weather data.
+
+```{r, SSE}
+#| code-fold: show
+sum(model$residuals^2)
+
+```
+
+*Minimizing the quadratic is beautiful, that's why we like squares. \~Bro. Saunders*
+
+<br>
+
+## Sum of Squared Regression, $SSR$
+
+START HERE: watch the next lesson and then do the next two. Move the Y's in p to the right a smidge, so they look better on the knitted version.
+
+```{r, SSRplot}
+p +
+geom_point(aes(x=Temp, y=mylm$fit), color = "dodgerblue3") +
+geom_rect(aes(xmin=Temp, xmax=Temp-(mylm$fit-ybar)*0.44,
+              ymin = pmin(ybar, mylm$fit), ymax = pmax(ybar, mylm$fit)),
+          color="pink2", alpha=0.1, fill="pink1") +
+annotate("rect", xmin=32, xmax=32 - 11*0.44, ymin=ybar, ymax=28.33, 
+         color="pink1", alpha=0.1, fill="pink1") +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)), # Vertical span
+  aes(x, y),
+  rotate = 90, # 90 for vertical
+  color = "pink2",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)),
+  aes(x, y),
+  label = TeX("$\\hat{Y_i}-\\bar{Y}$"),
+  rotate = 90,
+  color = "pink2")
+
+```
+
+Then do discussion board responses and read the two remaining acts.
+
+$$
+SSR = \sum_{i=1}^{n}{(\hat{Y_i}-\bar{Y})}^2
+$$
+
+\$\$
+
+\$\$
+
+```{r, SSR}
+
+```
+
+<br>
+
+## Total Sum of Squares, $SSTO$
+
+```{r, SSTOplot}
+p +
+geom_rect(aes(xmin=Temp, xmax=Temp-(TempTwoAhead-ybar)*0.44,
+              ymin = pmin(ybar, TempTwoAhead), ymax = pmax(ybar, TempTwoAhead)),
+          color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
+annotate("rect", xmin=32, xmax=32 - (39-ybar)*0.44, ymin=ybar, ymax=39, 
+         color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, actual-0.3)), # Vertical span
+  aes(x, y),
+  rotate = 270,
+  color = "darkorchid",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.2, 32.2), y = c(ybar+0.3, actual-0.3)),
+  aes(x, y),
+  label = TeX("${Y_i}-\\bar{Y}$"),
+  rotate = 270,
+  color = "darkorchid")
+```
+
+$$
+SSTO = \sum_{i=1}^{n}{({Y_i}-\bar{Y})}^2
+$$
+
+```{r, SSTO}
+
+
+```
+
+<br>
+
+#### Sum of Squares Relationships
+
+```{r, relationships}
+
+```
+
+<br>
+
+## R-Squared, $R^2$
+
+```{r, r2plot}
+
+```
+
+```{r, r2}
+
+```
+
+<br>
+
+## MSE & Residual Standard Error
+
+```{r, MSEplot}
+
+```
+
+```{r, MSE}
+
+```
+
+Notes from last time on mine? or mine on others
+
+I would try to be more clear in your explanation of degrees of freedom with the residuals, this paragraph was hard to understand.\
+\
+What do you mean specifically by "least squares?" I would explain that residuals help us understand how accurate our estimations are in comparison to the actual data points, this is why it's important in linear regression.
+
+What is sigma2 when you explain SSE? What parameters are incorporated with this? What is variance in linear regression?\
+\
+What line are you referring to in SSE? The regression line or true line? Be sure to also include a graphic for SSE, Brother Saunders has provided an example for us in the class code.\
+\
+I think you could also be more specific in your explanation for SSR and to mention that ybar is the average y-value.\
+\
+Good job explaining that SSTO is the total variability! Why is this important? What are the lowest and highest values for each SSE, SSR, & SSTO? What would a high/low value mean for each of these?\
+\
+You mentioned that 0.99 is a good r-squared value, but what does this mean to have a good r-squared value? A good way that you can explain r-squared with a graphic is to use barcharts and show that sse+ssr=ssto. This was we can the proportion of variable that can be explained by the y-value. Also be sure to use that definition in your theory assignment.\
+\
+No explanation for MSE.
+
+Re-read your notes in your file to see what could be added.
