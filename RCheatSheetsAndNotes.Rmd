@@ -240,7 +240,70 @@ plot(mylm$residuals)
 
 
 
-#### 2. ri, Sum of Squares, and R-squared  
+#### 2. ri, Sum of Squares, and R-squared
+
+A regression was performed for a sample of n = 5 data points.
+The y-values of the regression are: 3.78, 6.08, 6.65, 9.25, and 9.92.
+The residuals from the regression are: -0.266, 0.489, -0.486, 0.569, and -0.306.
+What is the R-squared value for this regression?
+ 
+y <- c(3.78, 6.08, 6.65, 9.25, 9.92)
+SSTO <- sum( (y - mean(y))^2 )
+#SSTO = 24.83372
+
+res <- c(-0.266, 0.489, -0.486, 0.569, -0.306)
+SSE <- sum(res^2)
+#SSE = 0.96347
+
+R2 = 1 - SSE/SSTO
+#R2 = 0.9612032
+
+2
+This data can be used to show that the displacement of the engine (disp)
+is positively correlated with the weight of the vehicle (wt).
+Apparently, this means disp is the Y and wt is the x
+Don't use mylm unless you've cleared everything or use something descriptive like clm for cars mylm
+mt.lm <- lm(disp ~ wt, data=mtcars)
+summary(mt.lm)
+
+Call:
+  lm(formula = disp ~ wt, data = mtcars)
+
+Residuals:
+  Min 1Q Median 3Q Max
+-88.18 -33.62 -10.05 35.15 125.59
+
+Coefficients:
+  Estimate Std. Error t value Pr(>|t|)
+(Intercept) -131.15 35.72 -3.672 0.000933 ***
+  wt 112.48 10.64 10.576 1.22e-11 ***
+  ---
+  Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 57.94 on 30 degrees of freedom
+Multiple R-squared: 0.7885, Adjusted R-squared: 0.7815  <- (multiple R-squared is R^2)
+F-statistic: 111.8 on 1 and 30 DF, p-value: 1.222e-11
+
+3
+Perform a regression of mpg on weight of the vehicle (mpg ~ wt).
+
+A certain statistics teacher at BYU-Idaho drives a 2001 Nissan Sentra that weighs
+approximately 2,700 lbs and currently gets only 21 mpg.
+Based on the regression you performed, how many mpg above or below average is this vehicle?
+  Perform a regression of mpg means mpg is the Y and wt is the x
+mt.lm <- lm(mpg ~ wt, data=mtcars) #perform the regression
+plot(mpg ~ wt, data=mtcars) #draw the regression (not needed, but nice)
+abline(mt.lm) #add the regression line (not needed, but nice)
+points(2.7, 21, pch=16, col="skyblue") #add the Nissan Sentra value (not needed, but nice)
+predict(mt.lm, data.frame(wt=2.7)) #get predicted value for Nissan Sentra
+1
+22.85505
+lines(c(2.7, 2.7), c(21, 22.85505), col="skyblue") #add residual line (not needed, but nice)
+myresidual <- 21 - 22.85505 #calculate difference between Y and Y-hat
+
+> myresidual
+[1] -1.85505
+?mtcars
 
 ##### Terms
 
