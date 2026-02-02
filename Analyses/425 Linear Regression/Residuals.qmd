@@ -20,7 +20,7 @@ library(DT)
 theme_set(theme_minimal()) 
 ```
 
-Basic terms of linear regression will be described using the data below which was collected from [timeanddate.com](#0).
+Basic terms of linear regression will be described using the data below which was collected from [timeanddate.com](#0). Please note that some squares near the right edge that would go off the plot are not drawn.
 
 ```{r, data}
 weather_hist <- read.csv("0110_Weather.csv")
@@ -42,12 +42,12 @@ The plot below uses a regression on the temperature data, colored in gold, to pr
 ```{r, baseplot}
 # create a base plot
 p <- ggplot(weather_hist, aes(y=TempTwoAhead, x=Temp)) +
-coord_cartesian(xlim = c(NA, 36)) +
+coord_cartesian(xlim = c(NA, 37.2)) +
 geom_hline(yintercept = ybar, color="darkgray") +
 geom_point(color="gold") +
 geom_smooth(method="lm", se=F, formula=y~x, color="lightblue", alpha=0.25, 
             fullrange=TRUE) +
-scale_x_continuous(limits = c(min(weather_hist$Temp)-1, 36), expand = c(0, 0)) +
+scale_x_continuous(limits = c(min(weather_hist$Temp)-1, 37.2), expand = c(0, 0)) +
 annotate("point", x=32, y=28.33, color="dodgerblue4") +
 annotate("point", x=32, y=actual, color="orange") +
 annotate("text", x=33.2, y=28.8, 
@@ -56,7 +56,7 @@ annotate("text", x=33.2, y=28.8,
 annotate("text", x=33.2, y=39.22, 
           label=TeX("$Y_i = 39^{\\circ}F$"), color="darkorange",
           size=3) +
-annotate("text", x=34.7, y=ybar-1.1, 
+annotate("text", x=37, y=ybar-1.1, 
           label=TeX("$\\bar{y}$"), color="gray60",
           size=3) +
 labs(
@@ -104,16 +104,17 @@ $$
 
 <br>
 
-For an lm() the sum of the residuals will always be 0. Residuals are always in a vertical direction because the x is not changing. Residuals can be used to show the variation in $Y_i$ not explained by the regression. The residuals for the regression line in the plot above can be found with the code below.
+For an lm() the sum of the residuals will always be 0. Residuals are always in a vertical direction because the x is not changing. They can be used to show the variation in $Y_i$ not explained by the regression. The residuals for the regression line in the plot above can be found with the code below.
 
 ```{r, residual}
 #| code-fold: show
-# create an lm
-model <- lm(TempTwoAhead~Temp, data=weather_hist)
+# mylm was created in "data" code block
 # pull the residuals from the model object, showing 3 for neatness
-head(model$residuals,3)
+head(mylm$residuals,3)
 
 ```
+
+*The residuals give us the line. \~Bro. Saunders*
 
 <br>
 
@@ -147,18 +148,18 @@ stat_bracetext(
 
 ```
 
-Since adding the residuals will always equal 0, the sum of residuals is not useful for assessing fit. Squaring the residuals eliminates negative values, so the total error of the model can be calculated. This is called the Sum of Squared Errors (because a residual is an error term) and measures how well the observed values match the predicted values.
+Since adding the residuals will always equal 0, the sum of squaring the residuals is more useful. Squaring the residuals eliminates negative values, so the total error of the model can be calculated. This is called the Sum of Squared Errors (because a residual is an error term) and measures how well the observed values match the predicted values.
 
-$$ SSE = \sum_{i=1}^{n}{(Y_i-\hat{Y_i})}^2 $$
+$$ SSE = \sum_{i=1}^{n}{(\underbrace{Y_i}_{Actual Temp}-\underbrace{\hat{Y_i}}_{Predicted Temp})}^2 $$
 
-Squaring guarantees the SSE will never be negative, $SSE \ge 0$ . This measurement also allows comparison of different models on the same data. The least squares regression line (where the area of the squares is lowest) is the best fit line, so the lowest SSE is better when using the same data. Unfortunately, squaring also means SSE can be greatly skewed by outliers. SSE is the difference between the \>\>\>\> FIX sum of actual values and the average values\<\<\<\<, $SSE = SSTO-SSR$ .
+Squaring guarantees the $SSE$ will never be negative, $SSE \ge 0$ . This measurement also allows comparison of different models on the same data and represents the portion of the variability that is still unexplained, so the lower the $SSE$, the better. Unfortunately, squaring also means SSE can be greatly skewed by outliers.
 
 The code below calculates the SSE for the linear model of the weather data.
 
 ```{r, SSE}
 #| code-fold: show
-sum(model$residuals^2)
-
+SSE <-sum(mylm$residuals^2)
+SSE
 ```
 
 *Minimizing the quadratic is beautiful, that's why we like squares. \~Bro. Saunders*
@@ -167,7 +168,7 @@ sum(model$residuals^2)
 
 ## Sum of Squared Regression, $SSR$
 
-START HERE: watch the next lesson and then do the next two. Move the Y's in p to the right a smidge, so they look better on the knitted version.
+The sum of squared regression indicates how much more explanatory value the regression has over just using the average y value. It indicates how much of the variability in the data we understand.
 
 ```{r, SSRplot}
 p +
@@ -175,7 +176,7 @@ geom_point(aes(x=Temp, y=mylm$fit), color = "dodgerblue3") +
 geom_rect(aes(xmin=Temp, xmax=Temp-(mylm$fit-ybar)*0.44,
               ymin = pmin(ybar, mylm$fit), ymax = pmax(ybar, mylm$fit)),
           color="pink2", alpha=0.1, fill="pink1") +
-annotate("rect", xmin=32, xmax=32 - 11*0.44, ymin=ybar, ymax=28.33, 
+annotate("rect", xmin=32, xmax=32 - 11.7744*0.44, ymin=ybar, ymax=28.33, 
          color="pink1", alpha=0.1, fill="pink1") +
 stat_brace(
   data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)), # Vertical span
@@ -193,23 +194,24 @@ stat_bracetext(
 
 ```
 
-Then do discussion board responses and read the two remaining acts.
+The $SSR$ is calculated by squaring the differences between the predicted values and the average value:
 
-$$
-SSR = \sum_{i=1}^{n}{(\hat{Y_i}-\bar{Y})}^2
-$$
+$$ SSR = \sum_{i=1}^{n}{(\underbrace{\hat{Y_i}}_{Predicted Temp}-\underbrace{\bar{Y}}_{Average Temp})}^2 $$
 
-\$\$
+Like $SSE$, the sum of square regression can be skewed by outliers and must be greater than or equal to zero, $SSR\ge0$. An $SSR$ of zero means the regression line is the same as the average y. Unlike $SSR$, the better the model, the larger the value because the regression has that much more value than the average y.
 
-\$\$
+The code below calculates the SSR of the the weather data.
 
 ```{r, SSR}
-
+SSR <- sum((mylm$fit-mean(weather_hist$TempTwoAhead))^2)
+SSR
 ```
 
 <br>
 
 ## Total Sum of Squares, $SSTO$
+
+The Total Sum of Squares is the total variability in the data.
 
 ```{r, SSTOplot}
 p +
@@ -233,63 +235,174 @@ stat_bracetext(
   color = "darkorchid")
 ```
 
+The $SSTO$ is calculated by squaring the actual temperatures minus average temp and then adding them together as shown below.
+
 $$
-SSTO = \sum_{i=1}^{n}{({Y_i}-\bar{Y})}^2
+SSTO = \sum_{i=1}^{n}{(\underbrace{{Y_i}}_{Actual Temp}-\underbrace{\bar{Y}}_{Average Temp})}^2
 $$
+
+Again, since the differences between the actual temps and the average temp are squared, the $SSTO$ can not be negative, $SSTO\ge0$. The code below finds the $SSTO$ for the data.
 
 ```{r, SSTO}
-
-
+SSTO <- sum((weather_hist$TempTwoAhead-mean(weather_hist$TempTwoAhead))^2)
+SSTO
 ```
 
 <br>
 
 #### Sum of Squares Relationships
 
-```{r, relationships}
+The plot below illustrates the relationship between the different types of sums of squares:
 
+```{r, relationships}
+p +
+# SSE
+annotate("rect", xmin=32, xmax=32 + 11*0.44, ymin=28.33, ymax=39, 
+         color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
+annotate("text", x=34.42 , y=40.1, label="SSE", color="dodgerblue2", size=4) +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)), # Vertical span
+  aes(x, y),
+  rotate = 90, # 90 for vertical
+  color = "dodgerblue3",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)),
+  aes(x, y),
+  label = TeX("$Y_i-\\hat{Y_i}$"),
+  rotate = 90,
+  color = "dodgerblue2",
+  size = 3) +
+# SSR
+annotate("rect", xmin=32, xmax=32 + 11.7744*0.44, ymin=ybar, ymax=28.33, 
+         color="pink1", alpha=0.1, fill="pink1") +
+annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", size=4) +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)), # Vertical span
+  aes(x, y),
+  rotate = 90, # 90 for vertical
+  color = "pink2",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)),
+  aes(x, y),
+  label = TeX("$\\hat{Y_i}-\\bar{Y}$"),
+  rotate = 90,
+  color = "pink2",
+  size = 3) +
+# SSTO
+annotate("rect", xmin=32, xmax=32 - (39-ybar)*0.44, ymin=ybar, ymax=39, 
+         color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
+annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", size=4) +
+stat_brace(
+  data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, actual-0.3)), # Vertical span
+  aes(x, y),
+  rotate = 270,
+  color = "darkorchid",
+  alpha = 0.5,
+  size = .5) +
+stat_bracetext(
+  data = data.frame(x = c(32.2, 32.2), y = c(ybar+0.3, actual-0.3)),
+  aes(x, y),
+  label = TeX("${Y_i}-\\bar{Y}$"),
+  rotate = 270,
+  color = "darkorchid",
+  size =3) 
 ```
+
+$$
+SSTO = SSE + SSR
+$$
+
+Notice that mixing blue and pink result in a light purple, just as $SSE$ and $SSR$ combine to make $SSTO$.
+
+The maximum value of any one of the sum of squares alone can be any non-negative value as long as the relationships are maintained such that the sum of the $SSE+SSR$ is the same as the $SSTO$. This means that neither the $SSE$ nor the $SSR$ can be greater than the $SSTO$. If the $SRR=SSTO$, then the $SSE$ would be 0. In other words, if $SSR=SSTO$ the regression fit is perfect. If $SSE=SSTO$, then the $SSR$ is 0 making the regression a horizontal line at $\bar{y}$.
 
 <br>
 
 ## R-Squared, $R^2$
 
+$R^2$ is the ratio between the the $SRR$ and the $SSTO$. It's the proportion of the variability in $Y_i$ explained by the regression or the strength the relationship between the model and the data. The higher the $R^2$, the stronger the relationship, the more variability explained by the model.
+
 ```{r, r2plot}
+p +
+# SSR
+annotate("rect", xmin=32, xmax=32 + 11.7744*0.44, ymin=ybar, ymax=28.33, 
+         color="pink1", alpha=0.1, fill="pink1") +
+annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", size=4) +
+# SSTO
+annotate("rect", xmin=32, xmax=32 - (39-ybar)*0.44, ymin=ybar, ymax=39, 
+         color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
+annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", size=4)
 
 ```
 
-```{r, r2}
+In the plot above the squares are hard to compare because they're different widths. Converting to columns makes it easier.
 
+```{r}
+R2plot <- data.frame(label=c('SSTO', 'SSR'), amount=c(SSTO, SSR))
+ggplot(data=R2plot, aes(x=label, y=amount, fill=label))+
+  geom_col(alpha=0.4) +
+  scale_fill_manual(values=c('SSTO'="mediumorchid1", 'SSR'='pink1')) 
+```
+
+The largest $R^2$ can be is 1 (the variability is completely explained by the regression), and the smallest is 0 (the explanatory value of the regression is no better than $\bar{Y}$).
+
+$$
+R^2 = \frac{SSR}{SSTO}
+$$
+
+The $SSR$ and $SSTO$ were stored as variables, so the code is simple.
+
+```{r, r2}
+SSR/SSTO
 ```
 
 <br>
 
 ## MSE & Residual Standard Error
 
+The $MSE$ is the mean of the $SSE$ \*. The plot below is the same as the plot previously used to demonstrate $SSE$, except inside every square representing the $SSE$, there's a smaller square which shows the $MSE$.
+
 ```{r, MSEplot}
+p +
+geom_point(aes(x=Temp, y=mylm$fit), color = "dodgerblue3") +
+geom_rect(aes(xmin=Temp, xmax=Temp - mylm$res*0.44,
+              ymin=mylm$fit, ymax=TempTwoAhead),
+          color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
+annotate("rect", xmin=32, xmax=32 - 11*0.44, ymin=28.33, ymax=39, 
+         color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
+geom_rect(aes(xmin=Temp, xmax=Temp - (mylm$res*0.44)/7,
+              ymin=mylm$fit, ymax=mylm$fit+mylm$residuals/7),
+          color="gray60", alpha=0.3, fill="gray60") +
+annotate("rect", xmin=32, xmax=32 - (11*0.44)/7, ymin=28.33, ymax=28.33+11/7, 
+         color="gray60", alpha=0.3, fill="gray60") 
+
 
 ```
+
+Due to squaring, $MSE \ge0$ . Like the other measures, it's sensitive to outliers and the units are squared. The $MSE$ is different from $R^2$ in that the former is an average while the latter is a proportion. The formula is:
+
+$$
+MSE = \frac{SSE}{n-p}
+$$
+
+\*Notice that rather than being divided by $n$ , the $SSE$ is divided by $n-p$ where $p$ is the number of parameters. Using the degrees of freedom, $n-p$, reduces bias. For simple linear regression the parameters are $\beta_0, \beta_1$ , so the $SSE$ for the data will be divided by 9-2 or 7.
 
 ```{r, MSE}
-
+SSE/7
 ```
 
-Notes from last time on mine? or mine on others
+Closely tied to the $MSE$ is the residual standard error, $r$. It's the square root of $R^2$ which allows the values to be from -1 to 1. $r$ is also called the correlation cooeficient:
 
-I would try to be more clear in your explanation of degrees of freedom with the residuals, this paragraph was hard to understand.\
-\
-What do you mean specifically by "least squares?" I would explain that residuals help us understand how accurate our estimations are in comparison to the actual data points, this is why it's important in linear regression.
+$$
+r=\sqrt{\frac{SSE}{n-p}}
+$$
 
-What is sigma2 when you explain SSE? What parameters are incorporated with this? What is variance in linear regression?\
-\
-What line are you referring to in SSE? The regression line or true line? Be sure to also include a graphic for SSE, Brother Saunders has provided an example for us in the class code.\
-\
-I think you could also be more specific in your explanation for SSR and to mention that ybar is the average y-value.\
-\
-Good job explaining that SSTO is the total variability! Why is this important? What are the lowest and highest values for each SSE, SSR, & SSTO? What would a high/low value mean for each of these?\
-\
-You mentioned that 0.99 is a good r-squared value, but what does this mean to have a good r-squared value? A good way that you can explain r-squared with a graphic is to use barcharts and show that sse+ssr=ssto. This was we can the proportion of variable that can be explained by the y-value. Also be sure to use that definition in your theory assignment.\
-\
-No explanation for MSE.
+It's easier to interpret because, unlike the various sum of squares and MSE, the units aren't squared. $r$ can be found in the model summary under residual standard error (3rd line up from the bottom).
 
-Re-read your notes in your file to see what could be added.
+```{r}
+summary(mylm)
+```
