@@ -417,16 +417,30 @@ myresidual <- 21 - 22.85505 #calculate difference between Y and Y-hat
 
 Residual Plots & Regression Assumptions & Transformations
 
-*  residuals vs. fitted-values (which=1), most important
-*  Q-Q Plot of Residuals (which=2), 2nd most important
-*  Residuals vs Order (lm$residals)
+*  residuals vs. fitted-values (which=1), most important (for assump 1 straight line,3 no pattern)
+*  Q-Q Plot of Residuals (which=2), least important (for assump 2, close to line)
+*  Residuals vs Order (lm$residals), second most important (for assump 5, no pattern)<br>
+
+
 Five Assumptions:
 
-1)  The regression relation between Y and X is linear. res v fit (red line straight) If bent results are meaningless--it affects everything. plot(mylm, which=1)
-2)  The error terms are normally distributed with E{ϵi}=0. QQ checks normality -> unwise to put too much trust in the residual standard error as an estimate of the standard deviation σ when not normal dist. plot(mylm, which=2)
-3)  The variance of the error terms is constant over all X values. Distance constant on res v fit--the residual standard error however should not be considered to be meaningful as it will be too large on one end of the regression and too small on the other end. plot(mylm, which=1)
+1)  The regression relation between Y and X is linear, plot(mylm, which=1)<br>
+*res v fit (red line straight) If bent results are meaningless--it affects everything.*<br>
+Nothing can be trusted if the linearity assumption is violated.
+2)  The error terms are normally distributed with E{ϵi}=0. QQ checks normality<br>
+plot(mylm, which=2)<br>
+*dots should be close to on the line, watch tails*<br>
+If the error terms are not normal, the slope and intercept are often still meaningful (when the independence assumption is violated), but the residual standard error could be unnecessarily large in this case. 
+3)  The variance of the error terms is constant over all X values, plot(mylm, which=1)<br>
+*no pattern in plot?*<br>
+Distance should be constant on res v fit. When variance of the error term changes across the regression, the regression approximates the “average variance” of the errors because the regression is still assuming the variance is constant across the regression. The estimates of the slope and intercept are still typically quite good, and can be used for interpretation. The residual standard error however should not be considered to be meaningful as it will be too large on one end of the regression and too small on the other end.<br> 
 4)  The X values can be considered fixed and measured without error.
-5)  The error terms are independent. res v order (no pattern)--While the slope and intercept are often still meaningful when the independence assumption is violated, the residual standard error could be unnecessarily large in this case. plot(mylm$residuals, ylab="Residuals")
+5)  The error terms are independent. plot(mylm$residuals, ylab="Residuals")<br>
+*res v order should have no pattern*<br>
+While the slope and intercept are often still meaningful when the independence assumption is violated, the residual standard error is unnecessarily large in this case.Can be checked when the data has natural ordering to it<br>
+
+Also--WATCH FOR OUTLIERS, While outliers do not violate any of the regression assumptions, they do pose substantial difficulties for the least squares regression estimates of the slope and intercept.
+
 $$Y_i = \underbrace{\beta_0 + \beta_1 \overbrace{X_i}^\text{#4}}_{\text{#1}} + \epsilon_i \quad \text{where} \ \overbrace{\epsilon_i \sim}^\text{#5} \overbrace{N(0}^\text{#2}, \overbrace{\sigma^2}^\text{#3})$$
 
 
@@ -449,6 +463,7 @@ plot(mylm$residuals)
 
 ###
 # Monday
+?mtcars
 lm.mt <- lm(mpg ~ qsec, data=mtcars)
 plot(mpg ~ qsec, data=mtcars)
 abline(lm.mt)
@@ -459,7 +474,7 @@ lm2 <- lm(drat ~ wt, data=mtcars)
 abline(lm2)
 plot(lm2, which=1)
 
-
+?Loblolly
 plot(height ~ age, data=Loblolly)
 lmlob <- lm(height ~ age, data=Loblolly)
 abline(lmlob)
@@ -467,6 +482,7 @@ plot(lmlob, which=1)
 
 summary(lmlob)
 
+?Orange
 plot(circumference ~ age, data=Orange)
 
 
