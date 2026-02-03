@@ -8,7 +8,7 @@ editor: visual
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.height=4.5, fig.width=4)
 
 library(tidyverse) 
 library(data.table)
@@ -52,13 +52,13 @@ annotate("point", x=32, y=28.33, color="dodgerblue4") +
 annotate("point", x=32, y=actual, color="orange") +
 annotate("text", x=33.2, y=28.8, 
           label=TeX("$\\hat{Y} = 28^{\\circ}F$"), color="dodgerblue4",
-          size=3) +
+          linewidth=3) +
 annotate("text", x=33.2, y=39.22, 
           label=TeX("$Y_i = 39^{\\circ}F$"), color="darkorange",
-          size=3) +
+          linewidth=3) +
 annotate("text", x=37, y=ybar-1.1, 
           label=TeX("$\\bar{y}$"), color="gray60",
-          size=3) +
+          linewidth=3) +
 labs(
   title = "Predicted Weather for Rexburg on January 12th",
   x = "High Temperature in \u00B0F Two Days Before with Similar Conditions",
@@ -87,7 +87,7 @@ stat_brace(
   rotate = 90, # 90 for vertical
   color = "dodgerblue3",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.2, 32.2), y = c(28.6, actual-0.3)),
   aes(x, y),
@@ -136,7 +136,7 @@ stat_brace(
   rotate = 90, # 90 for vertical
   color = "dodgerblue3",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)),
   aes(x, y),
@@ -184,7 +184,7 @@ stat_brace(
   rotate = 90, # 90 for vertical
   color = "pink2",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)),
   aes(x, y),
@@ -226,7 +226,7 @@ stat_brace(
   rotate = 270,
   color = "darkorchid",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.2, 32.2), y = c(ybar+0.3, actual-0.3)),
   aes(x, y),
@@ -259,57 +259,57 @@ p +
 # SSE
 annotate("rect", xmin=32, xmax=32 + 11*0.44, ymin=28.33, ymax=39, 
          color="dodgerblue2", alpha=0.1, fill="dodgerblue2") +
-annotate("text", x=34.42 , y=40.1, label="SSE", color="dodgerblue2", size=4) +
+annotate("text", x=34.42 , y=40.1, label="SSE", color="dodgerblue2", linewidth=4) +
 stat_brace(
   data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)), # Vertical span
   aes(x, y),
   rotate = 90, # 90 for vertical
   color = "dodgerblue3",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.1, 32.1), y = c(28.6, actual-0.3)),
   aes(x, y),
   label = TeX("$Y_i-\\hat{Y_i}$"),
   rotate = 90,
   color = "dodgerblue2",
-  size = 3) +
+  linewidth = 3) +
 # SSR
 annotate("rect", xmin=32, xmax=32 + 11.7744*0.44, ymin=ybar, ymax=28.33, 
          color="pink1", alpha=0.1, fill="pink1") +
-annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", size=4) +
+annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", linewidth=4) +
 stat_brace(
   data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)), # Vertical span
   aes(x, y),
   rotate = 90, # 90 for vertical
   color = "pink2",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, 28)),
   aes(x, y),
   label = TeX("$\\hat{Y_i}-\\bar{Y}$"),
   rotate = 90,
   color = "pink2",
-  size = 3) +
+  linewidth = 3) +
 # SSTO
 annotate("rect", xmin=32, xmax=32 - (39-ybar)*0.44, ymin=ybar, ymax=39, 
          color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
-annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", size=4) +
+annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", linewidth=4) +
 stat_brace(
   data = data.frame(x = c(32.1, 32.1), y = c(ybar+0.3, actual-0.3)), # Vertical span
   aes(x, y),
   rotate = 270,
   color = "darkorchid",
   alpha = 0.5,
-  size = .5) +
+  linewidth = .5) +
 stat_bracetext(
   data = data.frame(x = c(32.2, 32.2), y = c(ybar+0.3, actual-0.3)),
   aes(x, y),
   label = TeX("${Y_i}-\\bar{Y}$"),
   rotate = 270,
   color = "darkorchid",
-  size =3) 
+  linewidth =3) 
 ```
 
 $$
@@ -331,11 +331,11 @@ p +
 # SSR
 annotate("rect", xmin=32, xmax=32 + 11.7744*0.44, ymin=ybar, ymax=28.33, 
          color="pink1", alpha=0.1, fill="pink1") +
-annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", size=4) +
+annotate("text", x=34.42 , y=ybar-1.1, label="SSR", color="pink1", linewidth=4) +
 # SSTO
 annotate("rect", xmin=32, xmax=32 - (39-ybar)*0.44, ymin=ybar, ymax=39, 
          color="mediumorchid1", alpha=0.1, fill="mediumorchid1") +
-annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", size=4)
+annotate("text", x=27.062 , y=40.1, label="SSTO", color="darkorchid", linewidth=4)
 
 ```
 
