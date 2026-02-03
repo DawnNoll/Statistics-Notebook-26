@@ -415,13 +415,238 @@ myresidual <- 21 - 22.85505 #calculate difference between Y and Y-hat
 
 ### 03 Diagnostics
 
+Residual Plots & Regression Assumptions & Transformations
+
+*  residuals vs. fitted-values (which=1), most important
+*  Q-Q Plot of Residuals (which=2), 2nd most important
+*  Residuals vs Order (lm$residals)
+Five Assumptions:
+
+1)  The regression relation between Y and X is linear. res v fit (red line straight) If bent results are meaningless--it affects everything. plot(mylm, which=1)
+2)  The error terms are normally distributed with E{ϵi}=0. QQ checks normality -> unwise to put too much trust in the residual standard error as an estimate of the standard deviation σ when not normal dist. plot(mylm, which=2)
+3)  The variance of the error terms is constant over all X values. Distance constant on res v fit--the residual standard error however should not be considered to be meaningful as it will be too large on one end of the regression and too small on the other end. plot(mylm, which=1)
+4)  The X values can be considered fixed and measured without error.
+5)  The error terms are independent. res v order (no pattern)--While the slope and intercept are often still meaningful when the independence assumption is violated, the residual standard error could be unnecessarily large in this case. plot(mylm$residuals, ylab="Residuals")
+$$Y_i = \underbrace{\beta_0 + \beta_1 \overbrace{X_i}^\text{#4}}_{\text{#1}} + \epsilon_i \quad \text{where} \ \overbrace{\epsilon_i \sim}^\text{#5} \overbrace{N(0}^\text{#2}, \overbrace{\sigma^2}^\text{#3})$$
+
+
+How does plot change when we look at residuals vs fitted-values Which is the y
+How check assumption 4 Does it make sense th.n having x fixed is workes
+Explain the difficulties that arise when there is an outlier present. (how do outliers skew) biases the slope
+
+Mean Squared Error
+$$\begin{equation}
+  s^2 = MSE = \frac{SSE}{n-2} = \frac{\sum(Y_i-\widehat{Y}_i)^2}{n-2} = \frac{\sum r_i^2}{n-2}
+\end{equation}$$
+
+##### Class Code Diag
+
+```{r, eval=FALSE}
+# most important code
 par(mfrow=c(1,3))
 plot(mylm, which = 1:2)
 plot(mylm$residuals)
 
-##### Class Code Diag
+###
+# Monday
+lm.mt <- lm(mpg ~ qsec, data=mtcars)
+plot(mpg ~ qsec, data=mtcars)
+abline(lm.mt)
+plot(lm.mt, which=1)
 
-##### Quizzez Diag
+plot(drat ~ wt, data=mtcars)
+lm2 <- lm(drat ~ wt, data=mtcars)
+abline(lm2)
+plot(lm2, which=1)
+
+
+plot(height ~ age, data=Loblolly)
+lmlob <- lm(height ~ age, data=Loblolly)
+abline(lmlob)
+plot(lmlob, which=1)
+
+summary(lmlob)
+
+plot(circumference ~ age, data=Orange)
+
+
+boxplot(islands, col="forestgreen")
+boxplot(log(islands), col="forestgreen")
+
+library(mosaicData)
+View(Utilities)
+?Utilities
+
+
+
+gas.lm <- lm(gasbill ~ temp, data=Utilities)
+plot(gasbill ~ temp, data=Utilities)
+abline(gas.lm)
+# res v fitted
+plot(gas.lm, which=1)
+
+
+gas.lm.log <- lm(log(gasbill) ~ temp, data=Utilities)
+b <- coef(gas.lm.log)
+
+plot(log(gasbill) ~ temp, data=Utilities)
+abline(gas.lm.log)
+
+
+plot(gas.lm.log, which=1)
+summary(gas.lm.log)
+
+
+plot(gasbill ~ temp, data=Utilities)
+curve(exp(6.031885 - 0.041435*x), add=TRUE)
+
+plot(gasbill ~ temp, data=Utilities)
+abline(gas.lm)
+curve(exp(b[1] + b[2]*x), add=TRUE, col="skyblue")
+
+# Graphing Transformations
+ggplot(Orange, aes(x=age, y=circumference)) + 
+  geom_point(color="orangered") +
+  stat_function(fun=function(x) ())
+  labs(title="Growth of Orange Trees", x="Age of Tree in Days", y="Circumference of Tree (mm)") + 
+  theme_bw( )
+
+# Bro Saunders code
+  lm.log <- lm(log(circumference) ~ age, data=Orange)
+b.log <- coef(lm.log)
+b.log[1]
+b.log[2]
+
+lm.sqrt <- lm(sqrt(circumference) ~ age, data=Orange)
+b.sqrt <- coef(lm.sqrt)
+
+lm.1oY <- lm(1/circumference ~ age, data=Orange)
+b.1oY <- coef(lm.1oY)
+
+lm.y <- lm(circumference ~ age, data=Orange)
+b.y <- coef(lm.y)
+
+lm.y2 <- lm(circumference^2 ~ age, data=Orange)
+b.y2 <- coef(lm.y2)
+
+lm.1oY2 <- lm(1/circumference^2 ~ age, data=Orange)
+b.1oY2 <- coef(lm.1oY2)
+
+
+# Base Graphic
+
+
+plot(circumference ~ age, data=Orange, pch=16, col="orangered", main="Growth of Orange Trees", xlab="Age of Tree in Days", ylab="Circumference of Tree (mm)")
+
+curve( exp(b.log[1] + b.log[2]*x), add=TRUE, col="red")
+curve( (b.sqrt[1] + b.sqrt[2]*x)^2, add=TRUE, col="blue")
+curve( 1/(b.1oY[1] + b.1oY[2]*x), add=TRUE, col="green")
+curve( b.y[1] + b.y[2]*x, add=TRUE, col="gray")
+curve( sqrt(b.y2[1] + b.y2[2]*x), add=TRUE, col="orange")
+curve( 1/sqrt(b.1oY2[1] + b.1oY2[2]*x), add=TRUE, col="forestgreen")
+
+# ggplot Graphic
+
+library(tidyverse)
+
+ggplot(Orange, aes(x=age, y=circumference)) + 
+  geom_point(color="orangered") +
+  stat_function(fun=function(x) exp(b.log[1] + b.log[2]*x), aes(color="log(Y)")) + 
+  stat_function(fun=function(x) (b.sqrt[1] + b.sqrt[2]*x)^2, aes(color="sqrt(Y)")) + 
+  stat_function(fun=function(x) 1/(b.1oY[1] + b.1oY[2]*x), aes(color="1/Y")) + 
+  stat_function(fun=function(x) b.y[1] + b.y[2]*x, aes(color="Y")) + 
+  stat_function(fun=function(x) sqrt(b.y2[1] + b.y2[2]*x), aes(color="Y^2")) + 
+  stat_function(fun=function(x) 1/sqrt(b.1oY2[1] + b.1oY2[2]*x), aes(color="1/Y^2")) + 
+  labs(title="Growth of Orange Trees", x="Age of Tree in Days", y="Circumference of Tree (mm)") + 
+  theme_bw( ) 
+
+library(car)
+boxCox(lm.y)
+
+
+YoungOrange <- filter(Orange, age < 1200)
+
+
+lm.log <- lm(log(circumference) ~ age, data=YoungOrange)
+b.log <- coef(lm.log)
+
+lm.sqrt <- lm(sqrt(circumference) ~ age, data=YoungOrange)
+b.sqrt <- coef(lm.sqrt)
+
+lm.1oY <- lm(1/circumference ~ age, data=YoungOrange)
+b.1oY <- coef(lm.1oY)
+
+lm.y <- lm(circumference ~ age, data=YoungOrange)
+b.y <- coef(lm.y)
+
+lm.y2 <- lm(circumference^2 ~ age, data=YoungOrange)
+b.y2 <- coef(lm.y2)
+
+lm.1oY2 <- lm(1/circumference^2 ~ age, data=YoungOrange)
+b.1oY2 <- coef(lm.1oY2)
+
+
+
+ggplot(Orange, aes(x=age, y=circumference)) + 
+  geom_point(color="orangered") +
+  geom_vline(aes(xintercept=1200)) + 
+  stat_function(fun=function(x) exp(b.log[1] + b.log[2]*x), aes(color="log(Y)")) + 
+  stat_function(fun=function(x) (b.sqrt[1] + b.sqrt[2]*x)^2, aes(color="sqrt(Y)")) + 
+#  stat_function(fun=function(x) 1/(b.1oY[1] + b.1oY[2]*x), aes(color="1/Y")) + 
+  stat_function(fun=function(x) b.y[1] + b.y[2]*x, aes(color="Y")) + 
+  stat_function(fun=function(x) sqrt(b.y2[1] + b.y2[2]*x), aes(color="Y^2")) + 
+#  stat_function(fun=function(x) 1/sqrt(b.1oY2[1] + b.1oY2[2]*x), aes(color="1/Y^2")) + 
+  ylim(c(0,300)) + 
+  labs(title="Growth of Orange Trees", x="Age of Tree in Days", y="Circumference of Tree (mm)") + 
+  theme_bw( ) 
+```
+
+
+##### Quizzes Diag
+``` {r, eval=FALSE}
+View(Orange)
+o.lm <- lm(circumference ~ age, data=Orange)
+summary(o.lm)
+
+
+ggplot(data=Orange, mapping=aes(y=circumference, x=age)) + geom_point(color = "orange", pch=16) +
+geom_smooth(method="lm", formula=y~x, se=F) +
+stat_function(fun=function(x) (b[1] + b.[2]*x)^2, aes(color="sqrt(Y)")) + 
+  theme_minimal()
+
+# sqrt(MSE)
+sqrt(sum(o.lm$residuals^2)/(35-2))
+
+plot(o.lm, which=1:2)
+plot(o.lm$residuals)
+# the variance is not constant, minor issues with linearity, minor issues with normality
+
+library(car)
+boxCox(o.lm)
+o.sqrt.lm <- lm(sqrt(circumference) ~ age, data=Orange)
+summary(o.sqrt.lm)
+b <- coef(o.sqrt.lm)
+t.lm <- lm((b[0] + b[1]*age)^2 ~ age, data=Orange)
+
+ggplot(data=Orange, mapping=aes(y=sqrt(circumference), x=age)) + geom_point(color = "orange", pch=16) +
+geom_smooth(method="lm", formula=y~x, se=F) +
+  theme_minimal()
+
+plot(o.sqrt.lm, which=1:2)
+plot(o.sqrt.lm$residuals)
+
+plot(circumference ~ age, data=Orange)
+abline(o.lm)
+curve((b[1] + b[2]*x)^2, add=TRUE)
+
+ggplot(data=Orange, mapping=aes(y=circumference, x=age)) + geom_point(color = "orange", pch=16) +
+geom_smooth(method="lm", formula=y~x, se=F) +
+  
+  theme_minimal()
+
+o.pred <- predict(o.sqrt.lm, data.frame(age=500))
+o.pred^2  # use predict on the transformed model and then reverse the answer
+```
 
 <br>
 
