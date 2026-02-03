@@ -84,7 +84,7 @@ summary(mylm)
 
 It's difficult to tell with few data points, but the Residuals versus Fitted-Values plot may show a non-linear relationship. The Q-Q Plot of the Residuals may not be normal, and with so few points it's difficult to tell whether the Residuals versus Order Plot has patterns, so the independence of the error terms is undetermined. These plots would indicate that the model is questionable.
 
-```{r}
+```{r, fig.height=3}
 par(mfrow=c(1,3))
 plot(mylm, which = 1:2)
 plot(mylm$residuals)
