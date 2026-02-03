@@ -415,10 +415,10 @@ myresidual <- 21 - 22.85505 #calculate difference between Y and Y-hat
 
 ### 03 Diagnostics
 
-Residual Plots & Regression Assumptions & Transformations
+##### Residual Plots & Regression Assumptions & Transformations
 
 *  residuals vs. fitted-values (which=1), most important (for assump 1 straight line,3 no pattern)
-*  Q-Q Plot of Residuals (which=2), least important (for assump 2, close to line)
+*  Q-Q Plot of Residuals (which=2), least important (for assump 2, close to line) or library(car), qqPlot(lm$residuals) has guides
 *  Residuals vs Order (lm$residals), second most important (for assump 5, no pattern)<br>
 
 
@@ -437,7 +437,7 @@ Distance should be constant on res v fit. When variance of the error term change
 4)  The X values can be considered fixed and measured without error.
 5)  The error terms are independent. plot(mylm$residuals, ylab="Residuals")<br>
 *res v order should have no pattern*<br>
-While the slope and intercept are often still meaningful when the independence assumption is violated, the residual standard error is unnecessarily large in this case.Can be checked when the data has natural ordering to it<br>
+While the slope and intercept are often still meaningful when the independence assumption is violated, the residual standard error is unnecessarily large in this case.Can be checked when the data has natural ordering to it eg., time series often break it.<br>
 
 Also--WATCH FOR OUTLIERS, While outliers do not violate any of the regression assumptions, they do pose substantial difficulties for the least squares regression estimates of the slope and intercept.
 
@@ -448,6 +448,28 @@ How does plot change when we look at residuals vs fitted-values Which is the y
 How check assumption 4 Does it make sense th.n having x fixed is workes
 Explain the difficulties that arise when there is an outlier present. (how do outliers skew) biases the slope
 
+##### Transformations
+For week 03 assign, tell what BoxCox says, and whether you used it.
+Show math, my y` is this, my belief on the prime space is this, resulting equation back in original units is this.
+
+the log changes the way I see the data, changes the lens, changes my perspective. 
+Viewing a histogram of the islands data and log islands data--you can see more detail with the log view
+
+Y transformations can be found using boxCox
+boxCox(lm)     # from library(car), log-likelihood
+boxCox is a suggestion not a rule or law
+If no y transform needed, bCox will be around 1
+
+X transformations are more difficult to find because boxCox doesn't work. If linearity is violated, but variance across residuals is constant (both are on rvf which=1)
+
+When have a choice choose log transform because it's the only one that's interpretable. Also choose wisely, for orange trees y^2 trees have no circumference until day 200, 1/y don't really start growing for years and then take over:) For youngOrange, even though log was best for current data it may make less sense for a real set of random trees, y might be the best of these options. Make sure it's logical.
+
+He used the ` prime mark for optimus prime ie. it's been transformed. So Y`i = b0+b1 from other space
+Run a lm of transform Y, then summarize : summary(lm.t)
+save coef
+
+Interesting note from gpt
+When you back transform, this is actually estimating the median of the expression, not the mean, unless you apply a bias correction (interesting technicality)
 Mean Squared Error
 $$\begin{equation}
   s^2 = MSE = \frac{SSE}{n-2} = \frac{\sum(Y_i-\widehat{Y}_i)^2}{n-2} = \frac{\sum r_i^2}{n-2}
@@ -458,11 +480,13 @@ $$\begin{equation}
 ```{r, eval=FALSE}
 # most important code
 par(mfrow=c(1,3))
-plot(mylm, which = 1:2)
-plot(mylm$residuals)
+plot(mylm, which = 1:2) #1,3 & 2
+plot(mylm$residuals) #5
+boxCox(lm) # lambda for Y
 
 ###
-# Monday
+# Beg week- Diagnosing Models
+view(mtcars)
 ?mtcars
 lm.mt <- lm(mpg ~ qsec, data=mtcars)
 plot(mpg ~ qsec, data=mtcars)
@@ -475,60 +499,107 @@ abline(lm2)
 plot(lm2, which=1)
 
 ?Loblolly
+view(Loblolly)
 plot(height ~ age, data=Loblolly)
 lmlob <- lm(height ~ age, data=Loblolly)
 abline(lmlob)
 plot(lmlob, which=1)
+par(mfrow=c(1,3))
+plot(lmlob, which = 1:2)
+plot(lmlob$residuals)
 
 summary(lmlob)
 
 ?Orange
+View(Orange)
 plot(circumference ~ age, data=Orange)
 
+#Midweek- Intro to Transformations (log)
+#remember log default is natural log, so log(5000), is e^?=5000
+#exp(number), is e^number=what
+log(5000)
+exp(8.517193)
+exp(1) #2.718282
 
-boxplot(islands, col="forestgreen")
-boxplot(log(islands), col="forestgreen")
+hist(islands, col="forestgreen")
+hist(log(islands), col="forestgreen")
+exp(4)
+log(10000)
 
+# End of week
+# Graphing Transformations
 library(mosaicData)
+library(car)
 View(Utilities)
 ?Utilities
-
-
-
+# data with lm
 gas.lm <- lm(gasbill ~ temp, data=Utilities)
 plot(gasbill ~ temp, data=Utilities)
 abline(gas.lm)
 # res v fitted
-plot(gas.lm, which=1)
+plot(gas.lm, which=1) # bend in rvf, he says the outliers have notes, could be removed as bad data
+#NEW
+boxCox(gas.lm) # to find lambda for Y
+lambda <- -2
+plot(gasbill^lambda ~ temp, data=Utilities)
+
+# test multiple lambda's to see which is best
+for (lambda in c(-2, -1, -.5, -.4, -.3, -.2, -.1, .1, .25, .5, 1, 2)) {
+  plot(gasbill^lambda ~ temp, data=Utilities, main = paste("lambda = ", lambda))
+}
 
 
-gas.lm.log <- lm(log(gasbill) ~ temp, data=Utilities)
-b <- coef(gas.lm.log)
+for (lambda in seq(0.5, 0.005, length.out=10)) {
+  plot(gasbill^lambda ~ temp, data=Utilities, main = paste("lambda = ", lambda))
+}
 
 plot(log(gasbill) ~ temp, data=Utilities)
-abline(gas.lm.log)
+u.lm.t <- lm(log(gasbill) ~ temp, data=Utilities)
+abline(u.lm.t)
 
+summary(u.lm)$coef
+summary(u.lm.t)$coef
+
+exp(predict(u.lm.t, data.frame(temp=90)))
+predict(u.lm, data.frame(temp=90))
+
+
+plot(gasbill ~ temp, data=Utilities)
+curve(exp(6 - 0.04*x), add=TRUE, col="skyblue")
+
+
+ggplot(Utilities, aes(x=temp, y=gasbill)) + 
+  geom_point() + 
+  stat_function(fun=function(x) exp(6 - 0.04*x))
+
+# OLDdata with log transformation (sqrt, sqrt had best lambda)
+gas.lm.log <- lm(log(gasbill) ~ temp, data=Utilities)
+b <- coef(gas.lm.log) # grab line
+# untransform add line
+plot(log(gasbill) ~ temp, data=Utilities)
+abline(gas.lm.log)
 
 plot(gas.lm.log, which=1)
 summary(gas.lm.log)
 
-
-plot(gasbill ~ temp, data=Utilities)
-curve(exp(6.031885 - 0.041435*x), add=TRUE)
+#bring back the curved line
+plot(gasbill ~ temp, data=Utilities) # base plot, to log
+curve(exp(6.031885 - 0.041435*x), add=TRUE) # curve from log, but exp
 
 plot(gasbill ~ temp, data=Utilities)
 abline(gas.lm)
-curve(exp(b[1] + b[2]*x), add=TRUE, col="skyblue")
+curve(exp(b[1] + b[2]*x), add=TRUE, col="skyblue") #curve() requires lower-case x
 
-# Graphing Transformations
+
 ggplot(Orange, aes(x=age, y=circumference)) + 
   geom_point(color="orangered") +
-  stat_function(fun=function(x) ())
   labs(title="Growth of Orange Trees", x="Age of Tree in Days", y="Circumference of Tree (mm)") + 
   theme_bw( )
 
+  stat_function(fun=function(x) ())# not sure what this was for
+
 # Bro Saunders code
-  lm.log <- lm(log(circumference) ~ age, data=Orange)
+lm.log <- lm(log(circumference) ~ age, data=Orange)
 b.log <- coef(lm.log)
 b.log[1]
 b.log[2]

@@ -13,6 +13,7 @@ library(car)
 library(pander)
 ```
 
+*told we only need this if we have an older Stats notebook*
 ## Data from a True Model
 
 In a previous class activity, you created data from a true model, then compared the fitted-model to the true model. 
