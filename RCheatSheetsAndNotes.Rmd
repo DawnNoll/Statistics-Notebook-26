@@ -748,8 +748,8 @@ Sampling Distributions of Model Parameters
 Important to understand: ALL STATISTICS ARE WRONG! (because we have a sample)
 
 2 biggest problems in statistics:
-1) Every sample is wrong
-2) No 2 samples agree
+1) Every sample is wrong (but they are close)
+2) No 2 samples agree  
 When you take a sample from the population the line varies from the truth.
 The regression lines from samples are closer in the middle and further apart on the ends.
 
@@ -757,12 +757,22 @@ Residual Standard Error is the average spread of the dots from the line (sigma)
 Multiple R-squared is the proportion of variability in Y that's explained by the regression
 The Estimated Intercept, x, RSE, and R^2 tells us about our data.e The Std. Error, tvalue, and Pr (p), tell us about all possible samples around the truth. "One sample has enough DNA to recreate the whole dinosaur."
 
+repeating (rep) a sequence (seq) is the best way to collect data for regression (create samples), you get two replicates for each place--gives the most insight for the least data possible
 
+It can be mathematically proven the the expected value of b1 is beta1
+
+Only 3 things affect the final variability of the slope and the intercept, sigma (not in our control), sample size, and the spread of x
+
+MSE is the avg standard error and also a measure of the vertical variability of the dots around the line? y?
+
+${\sigma_{b_1}}^2 = \frac{\sigma^2}{sum(X_i-\bar{X})^2}$ The variability of the slope is the variability of the y's over the variability of the x's
+MSE is an approximation of sigma squared
 
 ##### Class Code Samp Dist
 
 ```{r, eval=FALSE}
 ### Week Start
+# inline r chunk `r beta_0` can use it to populate the equation
 # Sampling Distributions of Model Parameters
 #for loop
 N <- 512 
@@ -866,11 +876,104 @@ sd(storage_slope)
 # If I decrease the spread of x in the regression model, the sd increases.
 # If I increase the sigma, the sd increases.
 # If I decrease the sigma, the sd decreases.
+# reducing samle size increases variability
 ```
 
 ##### Class Code Hyp Test
-```{r, eval=FALSE}
+```{r, eval=FALSE, fig.height=8, fig.width=8}
 
+```{r}
+## Simulation to Show relationship between Standard Errors
+
+##-----------------------------------------------
+## Edit anything in this area... 
+
+n <- 100 #sample size (choose a decent size sample)
+# spread of x (choose a decent spread)
+Xstart <- 30 #lower-bound for x-axis 
+Xstop <- 100 #upper-bound for x-axis
+
+beta_0 <- 2 #choice of true y-intercept
+beta_1 <- 3.5 #choice of true slope
+sigma <- 13.8 #choice of st. deviation of error terms (choose a relatively small sigma)
+
+## End of Editable area.
+
+X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2) #Create X - this way most insight for least data 
+N <- 5000 #number of times to pull a random sample (for the assignment it's 3)
+# notice using b0, b1 because it's not the law, not beta
+storage_b0 <- storage_b1 <- rep(NA, N)
+for (i in 1:N){
+  Y <- beta_0 + beta_1*X + rnorm(n, 0, sigma) #Sample Y from true model
+  mylm <- lm(Y ~ X)
+  storage_b0[i] <- coef(mylm)[1]
+  storage_b1[i] <- coef(mylm)[2]
+}
+
+# only works if you're using base r
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), widths=c(2,2), heights=c(3,3))
+
+Ystart <- 0 #min(0,min(Y)) 
+Ystop <- 500 #max(max(Y), 0)
+Yrange <- Ystop - Ystart
+# need plot and histograms, the rest is extra
+plot(Y ~ X, xlim=c(min(0,Xstart-2), max(0,Xstop+2)), 
+     ylim=c(Ystart, Ystop), pch=16, col="gray",
+     main="Regression Lines from many Samples\n Plus Residual Standard Deviation Lines")
+text(Xstart, Ystop, bquote(sigma == .(sigma)), pos=1)
+text(Xstart, Ystop-.1*Yrange, bquote(sum ((x[i]-bar(x))^2, i==1, n) == .(var(X)*(n-1))), pos=1)
+text(Xstart, Ystop-.25*Yrange, bquote(sqrt(MSE) == .(mean(storage_rmse))), pos=1)
+
+
+for (i in 1:N){
+  abline(storage_b0[i], storage_b1[i], col="darkgray")  
+}
+abline(beta_0, beta_1, col="green", lwd=3)
+abline(beta_0+sigma, beta_1, col="green", lwd=2)
+abline(beta_0-sigma, beta_1, col="green", lwd=2)
+abline(beta_0+2*sigma, beta_1, col="green", lwd=1)
+abline(beta_0-2*sigma, beta_1, col="green", lwd=1)
+abline(beta_0+3*sigma, beta_1, col="green", lwd=.5)
+abline(beta_0-3*sigma, beta_1, col="green", lwd=.5)
+
+par(mai=c(1,.6,.5,.01))
+
+  addnorm <- function(m,s, col="firebrick"){
+    curve(dnorm(x, m, s), add=TRUE, col=col, lwd=2)
+    lines(c(m,m), c(0, dnorm(m,m,s)), lwd=2, col=col)
+    lines(rep(m-s,2), c(0, dnorm(m-s, m, s)), lwd=2, col=col)
+    lines(rep(m-2*s,2), c(0, dnorm(m-2*s, m, s)), lwd=2, col=col)
+    lines(rep(m-3*s,2), c(0, dnorm(m-3*s, m, s)), lwd=2, col=col)
+    lines(rep(m+s,2), c(0, dnorm(m+s, m, s)), lwd=2, col=col)
+    lines(rep(m+2*s,2), c(0, dnorm(m+2*s, m, s)), lwd=2, col=col)
+    lines(rep(m+3*s,2), c(0, dnorm(m+3*s, m, s)), lwd=2, col=col)
+    legend("topleft", legend=paste("Std. Error = ", round(s,3)), cex=0.7, bty="n")
+  }
+# All you really need is a histogram in storage
+  h0 <- hist(storage_b0, 
+             col="skyblue3", 
+             main="Sampling Distribution\n Y-intercept",
+             xlab=expression(paste("Estimates of ", beta[0], " from each Sample")),
+             freq=FALSE, yaxt='n', ylab="")
+  m0 <- mean(storage_b0)
+  s0 <- sd(storage_b0)
+  addnorm(m0,s0, col="green")
+  
+  h1 <- hist(storage_b1, 
+             col="skyblue3", 
+             main="Sampling Distribution\n Slope",
+             xlab=expression(paste("Estimates of ", beta[1], " from each Sample")),
+             freq=FALSE, yaxt='n', ylab="")
+  m1 <- mean(storage_b1)
+  s1 <- sd(storage_b1)
+  addnorm(m1,s1, col="green")
+
+# y-intercept distribution tells us the highest and lowest and most imp where we usually land on yaxis
+
+cars.lm <- lm(dist ~ speed, data=cars)
+summary(cars.lm)
+confint(mylm)
+```
 ```
 
 
