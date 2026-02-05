@@ -19,6 +19,10 @@ output:
 
 * [ggplot2 Cheat Sheet](https://ctl.duke.edu/wp-content/uploads/2020/07/R_ggplot2_cheatsheet.pdf)
 
+* [Math 221 Textbook](https://byuistats.github.io/BYUI_M221_Book/Lesson01.html)
+
+* [Sampling Distribution Applet](https://onlinestatbook.com/stat_sim/sampling_dist/index.html)
+
 ## Test Tips
 
 Read output carefully so you understand what it's saying! For quartemile time (qsec) a lower number is  better.<br>
@@ -55,6 +59,8 @@ Standard error = estimated standard deviation = the residual standard error in s
 An increase of 1,000 lbs in the weight of a vehicle results in a 5.34 mpg decrease in the average gas mileage of such vehicles.
 
 The interpretation of β1 is the amount of increase (or decrease) in the average y-value, denoted E{Y}, per unit change in X. It is often misunderstood to be the “average change in y” or just “the change in y” but it is more correctly referred to as the “change in the average y”.
+
+In the summary, the sigma is residual standard error and the r2 is Multiple R squared
 
 ##### Class Code lm
 ```{r, eval=FALSE}
@@ -413,7 +419,7 @@ myresidual <- 21 - 22.85505 #calculate difference between Y and Y-hat
 
 
 
-### 03 Diagnostics
+### 03 Diagnostics & Transformations
 
 ##### Residual Plots & Regression Assumptions & Transformations
 
@@ -734,6 +740,146 @@ geom_smooth(method="lm", formula=y~x, se=F) +
 o.pred <- predict(o.sqrt.lm, data.frame(age=500))
 o.pred^2  # use predict on the transformed model and then reverse the answer
 ```
+
+<br>
+
+### 04 Hypothesis Test for Model Parameters
+Sampling Distributions of Model Parameters
+Important to understand: ALL STATISTICS ARE WRONG! (because we have a sample)
+
+2 biggest problems in statistics:
+1) Every sample is wrong
+2) No 2 samples agree
+When you take a sample from the population the line varies from the truth.
+The regression lines from samples are closer in the middle and further apart on the ends.
+
+Residual Standard Error is the average spread of the dots from the line (sigma)
+Multiple R-squared is the proportion of variability in Y that's explained by the regression
+The Estimated Intercept, x, RSE, and R^2 tells us about our data.e The Std. Error, tvalue, and Pr (p), tell us about all possible samples around the truth. "One sample has enough DNA to recreate the whole dinosaur."
+
+
+
+##### Class Code Samp Dist
+
+```{r, eval=FALSE}
+### Week Start
+# Sampling Distributions of Model Parameters
+#for loop
+N <- 512 
+storage <- rep(NA, N)
+storage
+
+for (i in 1:N){
+  storage[i] <- 2*i
+  cat("i =", i, " and 2*i =", 2*i, " was saved in storage[", i, "]\n")
+}
+
+storage
+
+# abline stands for add b-slope line
+# geom_smooth, se=F, takes the band away, this week remove, so we can see the band the band suggests where the true line will be
+
+
+library(tidyverse)
+
+set.seed(121)
+
+
+N <- 50000
+beta0 <- 3
+beta1 <- 2.5
+
+sigma <- 1.2
+
+X <- rnorm(N, 30, 5)
+Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
+
+plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16)
+
+n <- 5
+mysample1 <- sample(N, n)
+
+points(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16)
+mylm1 <- lm(Y[mysample1] ~ X[mysample1])
+summary(mylm1)
+abline(mylm1, col="hotpink")
+abline(beta0, beta1, col="green1")
+
+
+n <- 5
+mysample2 <- sample(N, n)
+
+points(Y[mysample2] ~ X[mysample2], col="lemonchiffon", pch=16)
+mylm2 <- lm(Y[mysample2] ~ X[mysample2])
+summary(mylm2)
+abline(mylm2, col="lemonchiffon")
+
+mydata <- data.frame(Y=Y[mysample2],X=X[mysample2])
+
+ggplot(mydata, aes(x=X, y=Y)) + 
+  geom_point() + 
+  geom_smooth(method="lm", formula=y~x) + 
+  geom_abline(aes(intercept=beta0, slope=beta1), color="green1")
+
+
+N <- 512  
+storage <- rep(NA, N)
+storage
+
+for (i in 1:N){
+  storage[i] <- 2*i
+}
+
+storage
+
+
+N <- 5000
+storage_int <- storage_slope <- rep(NA, N)
+
+for (i in 1:N){
+
+  #Hint 1
+
+  n <- 40
+  Xi <- rep(seq(30, 100, length.out=n/2), each=2) #n must be even.
+  Yi <- 2.5 + 3*Xi + rnorm(n, 0, 1.2)
+
+  #Hint 2
+
+  mylm <- lm(Yi ~ Xi)
+  #coef(mylm)
+  storage_int[i] <- coef(mylm)[1] #intercept only
+  storage_slope[i] <- coef(mylm)[2] #slope only
+
+}
+
+#Hint 3
+hist(storage_int)
+hist(storage_slope)
+
+mean(storage_int)
+mean(storage_slope)
+sd(storage_int)
+sd(storage_slope)
+
+# If I increase the spread of x in the regression model, the sd decreases. 
+# If I decrease the spread of x in the regression model, the sd increases.
+# If I increase the sigma, the sd increases.
+# If I decrease the sigma, the sd decreases.
+```
+
+##### Class Code Hyp Test
+```{r, eval=FALSE}
+
+```
+
+
+##### Quizzes Hyp Param
+
+```{r, eval=FALSE}
+
+```
+
 
 <br>
 

@@ -1,0 +1,107 @@
+---
+title: "SamplingDistributionsUnveiled"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.height=4.5, fig.width=4)
+
+library(tidyverse) 
+library(data.table)
+library(latex2exp)
+library(ggbrace)
+library(mosaic) 
+library(DT)
+
+theme_set(theme_minimal()) 
+```
+
+## Sampling Distributions of the Slope and Intercept of a Regression Line
+
+-   Define the term "sampling distribution."
+
+-   Pick a fictitious context for your "population" and establish a "law" (regression model) for that population by specifying values and contexts for:
+
+    A researcher looked at small home wind turbines in South East Idaho. \
+
+    $$
+    \underbrace{Y_i}_\text{Daily kWh Generated} = \overbrace{\beta_0}^\text{9 m/h} + \overbrace{\beta_1}^\text{some value } \underbrace{X_i}_\text{Average Daily Wind Speed} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{some value})
+    $$
+
+```{r, data}
+set.seed(121)
+
+N <- 50000#4150000 this might not be a good idea-take a long time to load
+beta0 <- 1 # pick a number based on your fict idea
+beta1 <- 2.5 #1.32
+sigma <- 1.25
+
+X <- rnorm(N, 30, 5)
+Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
+
+plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16) #rgb(red, green, blue, alpha)
+
+n <- 5
+mysample1 <- sample(N, n)
+
+points(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16)
+mylm1 <- lm(Y[mysample1] ~ X[mysample1])
+summary(mylm1)
+abline(mylm1, col="hotpink")
+abline(beta0, beta1, col="green1")
+
+n <- 5
+mysample2 <- sample(N, n)
+
+points(Y[mysample2] ~ X[mysample2], col="orange", pch=16)
+mylm1 <- lm(Y[mysample2] ~ X[mysample2])
+summary(mylm1)
+abline(mylm1, col="orange")
+abline(beta0, beta1, col="green1")
+
+# Code for creating thousands of samples:
+# In R NA means not available. It does not mean null.
+
+```
+
+-   Show scatterplots and regression summary's for three different samples of data (of a given sample size) from your population.
+
+-   Demonstrate how the sampling distribution is obtained for several thousand samples of both the slope and the intercept estimates and in your regression context.
+
+-   Clearly explain what the mean and standard deviation (often called the standard error) are for each of these two distributions.
+
+-   Most importantly, provide thorough explanation of what the standard error of your three summary output's from before measure with regards to the sampling distributions.
+
+-   Show how the standard error is effected by the (1) sample size, (2) the value of sigma you choose, and (3) the range of the x-values.
+
+<br>
+
+## P-values
+
+-   Demonstrate how the **standard errors** of the sampling distributions for both the slope and intercept estimates are used to obtain p-values for the tests of hypotheses about and (the true intercept and slope of the regression model).
+
+-   Discuss why this works.
+
+-   Reveal the logic behind the p-value.
+
+-   Show the equation of the t-value and how to use the pt(...) function in R to convert a t-value to a two-sided p-value.
+
+-   Show that you can calculate yourself the p-value shown in one of your summary outputs from above.
+
+<br>
+
+## Confidence Intervals
+
+-   Demonstrate how the **standard errors** of each sampling distribution are used to create confidence intervals for the true regression intercept, , and true regression slope, .
+
+-   Explain what a confidence interval really is... explain why it captures the true parameter values "95% of the time."
+
+-   Show how to use the qt(...) function in R to obtain the critical value t\* of the confidence interval.
+
+-   Show the equation of the confidence interval and explain how it is using the standard error of the sampling distribution.
+
+-   Match the results of confint(mylm) using qt(...) and the standard error from one of your regression summary outputs to calculate the same confidence interval yourself.
