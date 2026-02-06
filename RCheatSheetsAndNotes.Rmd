@@ -23,6 +23,8 @@ output:
 
 * [Sampling Distribution Applet](https://onlinestatbook.com/stat_sim/sampling_dist/index.html)
 
+* [Normal t Probability Applet](https://byuimath.com/apps/normprobwitht.html?z=-2.601&df=48)
+
 ## Test Tips
 
 Read output carefully so you understand what it's saying! For quartemile time (qsec) a lower number is  better.<br>
@@ -31,6 +33,21 @@ Make sure to check whether the answer is positive or negative.<br>
 Make sure you put a zero before the decimal in Canvas.<br>
 Make sure you hit Ctrl+enter
 For SSE, etc load them into named variables, so it's easier to work with them ie, SSR/SSTO for R^2
+
+## Basics
+P-value indicates how likely the sample results are assumingthe null hyp is true (It is not the probability the null hyp is correct and is not measure the size or importance of the result)
+
+We use a t distribution when variance is unknown
+
+
+Type 1: a true null hyp incorrectly rejected
+Type 2: a null hypothesis incorrectly accepted
+An alpha of .05 means there's a 5% risk of deciding an effect exists when it doesn't
+If the P-value is greater than or equal to the critical value, we don't reject the null hypothesis
+You can reject the null hypothesis or fail to reject the null hypothesis
+
+Null Hypothesis uppertail for claim saying higher (>), lower tail for claim saying lower/less (<) and two-tailed test for something saying is different ($\neq$)<br>
+Test statistic is an number competed from sample used to determine whether to accept/reject the null hypothesis.
 
 ## Modules
 
@@ -768,6 +785,11 @@ MSE is the avg standard error and also a measure of the vertical variability of 
 ${\sigma_{b_1}}^2 = \frac{\sigma^2}{sum(X_i-\bar{X})^2}$ The variability of the slope is the variability of the y's over the variability of the x's
 MSE is an approximation of sigma squared
 
+Pander is in the pander package
+pander(summary(cars.lm)$coefficients) produces a table which has the info necessary to calculate t and p values, see Inference for the Model Parameters in the Statistic Notebook
+
+For hypothesis questions see Inference for Model Parameters remember pt() only calculates 1 tail, so it has to be doubled if our alt hypothesis is not equal
+
 ##### Class Code Samp Dist
 
 ```{r, eval=FALSE}
@@ -973,9 +995,30 @@ par(mai=c(1,.6,.5,.01))
 cars.lm <- lm(dist ~ speed, data=cars)
 summary(cars.lm)
 confint(mylm)
-```
-```
 
+# compute t
+# using items from lm summary
+calculate_t <- function(estimate, std_error, number=0){
+  # number is the value from hypotheses eg. H0:B0=3)
+  (estimate - number)/std_error
+}
+
+# compute P-value use percentile function for t-dist pt(tvalue, DofF)
+# gives one-tail, so multiply by 2 for alt hyp with not equal
+# find p value 2 tailed where b1=3.932, sb1=.4155, H0=3
+t <- calculate_t(3.932, .4155, 3)
+2*pt(-abs(2.243), 48)
+# for confidence intervals use confint(mylm)
+# calc conf intvl for 1 or more param in fitted model. 
+predict(..., interval="prediction") #predict ind value
+predict(..., interval="confidence") # estimate location of mean y
+```
+```
+```{r}
+library(pander)
+cars.lm <- lm(dist ~ speed, data=cars)
+pander(summary(cars.lm)$coefficients)
+```
 
 ##### Quizzes Hyp Param
 

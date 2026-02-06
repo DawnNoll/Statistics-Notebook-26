@@ -33,15 +33,22 @@ $$
 
 ```{r, fig.height=8, fig.width=8}
 X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2) #Create X - this way most insight for least data 
-N <- 5000 #number of times to pull a random sample (for the assignment it's 3)
+N <- 100 #number of times to pull a random sample (for the assignment it's 3)
+
 # notice using b0, b1 because it's not the law, not beta
 storage_b0 <- storage_b1 <- rep(NA, N)
+storage_X <- storage_Y <- rep(NA, N)
 for (i in 1:N){
   Y <- beta_0 + beta_1*X + rnorm(n, 0, sigma) #Sample Y from true model
   mylm <- lm(Y ~ X)
   storage_b0[i] <- coef(mylm)[1]
   storage_b1[i] <- coef(mylm)[2]
+  storage_X <- X
+  storage_Y <- Y
 }
+
+storage_X
+storage_Y
 
 # only works if you're using base r
 layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), widths=c(2,2), heights=c(3,3))
@@ -55,7 +62,6 @@ plot(Y ~ X, xlim=c(min(0,Xstart-2), max(0,Xstop+2)),
      main="Regression Lines from many Samples\n Plus Residual Standard Deviation Lines")
 text(Xstart, Ystop, bquote(sigma == .(sigma)), pos=1)
 text(Xstart, Ystop-.1*Yrange, bquote(sum ((x[i]-bar(x))^2, i==1, n) == .(var(X)*(n-1))), pos=1)
-text(Xstart, Ystop-.25*Yrange, bquote(sqrt(MSE) == .(mean(storage_rmse))), pos=1)
 
 
 for (i in 1:N){

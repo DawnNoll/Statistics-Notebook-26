@@ -27,7 +27,25 @@ A sampling distribution is what you get when you take many samples of the same p
 ```{r, eval=FALSE, fig.height=8, fig.width=8}
 set.seed(616)
 
- 
+#test
+N <- 50000
+beta0 <- 3
+beta1 <- 2.5
+
+sigma <- 1.2
+
+Xstart <- 10 #lower-bound for x-axis 
+Xstop <- 300 #upper-bound for x-axis
+
+X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2)
+Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
+
+plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16)
+
+
+
+
+# later code
 n <- 100 #sample size (choose a decent size sample)
 # spread of x (choose a decent spread)
 Xstart <- 5 #lower-bound for x-axis 
