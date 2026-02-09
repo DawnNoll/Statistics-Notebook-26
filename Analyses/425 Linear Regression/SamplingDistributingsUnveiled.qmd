@@ -7,159 +7,68 @@ format:
 editor: visual
 ---
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.height=4.5, fig.width=4)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.height=3)
 
 library(tidyverse) 
-library(data.table)
 library(latex2exp)
-library(ggbrace)
-library(mosaic) 
-library(DT)
+#library(cowplot)
+library(pander)
+#library(mosaic) 
 
 theme_set(theme_minimal()) 
 ```
 
 ## Sampling Distributions of the Slope and Intercept of a Regression Line
 
-A sampling distribution is what you get when you take many samples of the same population. It essentially allows us to find the mean of many means and the standard deviation of many standard deviations. Our understanding of sampling distributions allow us to infer what is true for population.
+A sampling distribution is what you get when you take many samples of the same population. It essentially allows us to explore the behavior of some statistic. Our understanding of sampling distributions allow us to infer what is true for population and how wrong we could be.
 
-```{r, eval=FALSE, fig.height=8, fig.width=8}
+```{r samples, eval=TRUE}
 set.seed(616)
-
-#test
-N <- 50000
+N <- 5000
 beta0 <- 3
 beta1 <- 2.5
 
 sigma <- 1.2
 
-Xstart <- 10 #lower-bound for x-axis 
-Xstop <- 300 #upper-bound for x-axis
-
-X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2)
+X <- rnorm(N, 30, 5)
 Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
 
-plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16)
+#plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16)
 
+n <- 100
+mysample1 <- sample(N, n)
+mysample2 <- sample(N, n)
+mysample3 <- sample(N, n)
 
+plot(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16)
+mylm1 <- lm(Y[mysample1] ~ X[mysample1])
+summary(mylm1)
+abline(mylm1, col="hotpink")
 
+plot(Y[mysample2] ~ X[mysample2], col="skyblue", pch=16)
+mylm2 <- lm(Y[mysample2] ~ X[mysample2])
+summary(mylm2)
+abline(mylm2, col="skyblue")
 
-# later code
-n <- 100 #sample size (choose a decent size sample)
-# spread of x (choose a decent spread)
-Xstart <- 5 #lower-bound for x-axis 
-Xstop <- 300 #upper-bound for x-axis
+plot(Y[mysample3] ~ X[mysample3], col="green", pch=16)
+mylm3 <- lm(Y[mysample3] ~ X[mysample3])
+summary(mylm3)
+abline(mylm3, col="green")
 
-# set the law
-beta_0 <- 32   #system and base apps/true y-intercept
-beta_1 <- 2 #choice of true slope
-sigma <- 3.4   #choice of sd
+pander(mylm1, caption = "Sample 1")
+pander(mylm2, caption = "Sample 2")
+pander(mylm3, caption = "Sample 3")
+```
 
-
-#Create X - this way most insight for least data 
-X <- rep(seq(Xstart,Xstop, length.out=n/2), each=2) 
-N <- 5000 #number of times to pull a random sample (for the assignment it's 3)
-
-# create storage first for efficiency
-storage_b0 <- storage_b1 <- rep(NA, N)
-
-for (i in 1:N){
-  Y <- beta_0 + beta_1*X + rnorm(n, 0, sigma) #Sample Y from true model
-  mylm <- lm(Y ~ X)
-  storage_b0[i] <- coef(mylm)[1]
-  storage_b1[i] <- coef(mylm)[2]
-}
-
-# only works if you're using base r
-layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), widths=c(2,2), heights=c(3,3))
-
-Ystart <- 0 #min(0,min(Y)) 
-Ystop <- 500 #max(max(Y), 0)
-Yrange <- Ystop - Ystart
-# need plot and histograms, the rest is extra
-plot(Y ~ X, xlim=c(min(0,Xstart-2), max(0,Xstop+2)), 
-     ylim=c(Ystart, Ystop), pch=16, col="gray",
-     main="Regression Lines from many Samples\n Plus Residual Standard Deviation Lines")
-text(Xstart, Ystop, bquote(sigma == .(sigma)), pos=1)
-text(Xstart, Ystop-.1*Yrange, bquote(sum ((x[i]-bar(x))^2, i==1, n) == .(var(X)*(n-1))), pos=1)
-
-
-
-# for (i in 1:N){
-#   abline(storage_b0[i], storage_b1[i], col="darkgray")  
-# }
-# abline(beta_0, beta_1, col="green", lwd=3)
-# abline(beta_0+sigma, beta_1, col="green", lwd=2)
-# abline(beta_0-sigma, beta_1, col="green", lwd=2)
-# abline(beta_0+2*sigma, beta_1, col="green", lwd=1)
-# abline(beta_0-2*sigma, beta_1, col="green", lwd=1)
-# abline(beta_0+3*sigma, beta_1, col="green", lwd=.5)
-# abline(beta_0-3*sigma, beta_1, col="green", lwd=.5)
-# 
-# par(mai=c(1,.6,.5,.01))
-# 
-#   addnorm <- function(m,s, col="firebrick"){
-#     curve(dnorm(x, m, s), add=TRUE, col=col, lwd=2)
-#     lines(c(m,m), c(0, dnorm(m,m,s)), lwd=2, col=col)
-#     lines(rep(m-s,2), c(0, dnorm(m-s, m, s)), lwd=2, col=col)
-#     lines(rep(m-2*s,2), c(0, dnorm(m-2*s, m, s)), lwd=2, col=col)
-#     lines(rep(m-3*s,2), c(0, dnorm(m-3*s, m, s)), lwd=2, col=col)
-#     lines(rep(m+s,2), c(0, dnorm(m+s, m, s)), lwd=2, col=col)
-#     lines(rep(m+2*s,2), c(0, dnorm(m+2*s, m, s)), lwd=2, col=col)
-#     lines(rep(m+3*s,2), c(0, dnorm(m+3*s, m, s)), lwd=2, col=col)
-#     legend("topleft", legend=paste("Std. Error = ", round(s,3)), cex=0.7, bty="n")
-#   }
-# # All you really need is a histogram in storage
-#   h0 <- hist(storage_b0, 
-#              col="skyblue3", 
-#              main="Sampling Distribution\n Y-intercept",
-#              xlab=expression(paste("Estimates of ", beta[0], " from each Sample")),
-#              freq=FALSE, yaxt='n', ylab="")
-#   m0 <- mean(storage_b0)
-#   s0 <- sd(storage_b0)
-#   addnorm(m0,s0, col="green")
-#   
-#   h1 <- hist(storage_b1, 
-#              col="skyblue3", 
-#              main="Sampling Distribution\n Slope",
-#              xlab=expression(paste("Estimates of ", beta[1], " from each Sample")),
-#              freq=FALSE, yaxt='n', ylab="")
-#   m1 <- mean(storage_b1)
-#   s1 <- sd(storage_b1)
-#   addnorm(m1,s1, col="green")
-# 
-# ### Monday
-# X <- rnorm(N, 30, 5)
-# Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
-# 
-# plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16) #rgb(red, green, blue, alpha)
-# 
-# n <- 5
-# mysample1 <- sample(N, n)
-# 
-# points(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16)
-# mylm1 <- lm(Y[mysample1] ~ X[mysample1])
-# summary(mylm1)
-# abline(mylm1, col="hotpink")
-# abline(beta0, beta1, col="green1")
-# 
-# n <- 5
-# mysample2 <- sample(N, n)
-# 
-# points(Y[mysample2] ~ X[mysample2], col="orange", pch=16)
-# mylm1 <- lm(Y[mysample2] ~ X[mysample2])
-# summary(mylm1)
-# abline(mylm1, col="orange")
-# abline(beta0, beta1, col="green1")
-
+```{}
 ```
 
 -   A researcher investigated whether the number of cute animal photos stored on a phone could predict the total storage used.
 
     $$ \underbrace{Y_i}_\text{Storage Used in GB} = \overbrace{\beta_0}^\text{`r beta_0` GB} + \overbrace{\beta_1}^\text{`r beta_1` } \underbrace{X_i}_\text{Photos} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{`r sigma` GB^2}) $$
 
-    ```{}
+    ```         
     ```
 
 -   Show scatterplots and regression summary's for three different samples of data (of a given sample size) from your population. *shows all samples are wrong and none agree*
