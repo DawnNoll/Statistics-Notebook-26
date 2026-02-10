@@ -66,7 +66,7 @@ pander(mylm3, caption = "Sample 3")
 
 -   A researcher investigated whether the number of cute animal photos stored on a phone could predict the total storage used.
 
-    $$ \underbrace{Y_i}_\text{Storage Used in GB} = \overbrace{\beta_0}^\text{`r beta_0` GB} + \overbrace{\beta_1}^\text{`r beta_1` } \underbrace{X_i}_\text{Photos} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{`r sigma` GB^2}) $$
+    $$ \underbrace{Y_i}_\text{Storage Used in GB} = \overbrace{\beta_0}^\text{`r beta0` GB} + \overbrace{\beta1}^\text{`r beta1` } \underbrace{X_i}_\text{Photos} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{`r sigma` GB^2}) $$
 
     ```         
     ```
