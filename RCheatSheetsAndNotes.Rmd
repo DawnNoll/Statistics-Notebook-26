@@ -1012,13 +1012,55 @@ t <- calculate_t(3.932, .4155, 3)
 # calc conf intvl for 1 or more param in fitted model. 
 predict(..., interval="prediction") #predict ind value
 predict(..., interval="confidence") # estimate location of mean y
-```
-```
-```{r}
+
+
 library(pander)
 cars.lm <- lm(dist ~ speed, data=cars)
 pander(summary(cars.lm)$coefficients)
 ```
+##### Class Code t-test pvalue
+
+[t-distrubution applet](https://byuimath.com/apps/normprobwitht.html)
+The area to the left is the percentile.
+3 dots gives you 1 degree of freedom. 
+Linear regression for  8 dots is 6 degrees of freedom.
+If we double the left value, it won't be more than half.
+pt stands for percentile of t (positive gives tv over 50%)
+t-value measures the size of the difference relative to the variation in your sample-- it is the difference represented in units of standarad error. A t-test puts the tsvalue in context of the calculated t-distribution so you can derive a probability.
+
+```{r}
+curve(dt(x, 3), from=-4, to=4, lwd=2)
+   curve(dnorm(x), add=TRUE, col="gray")
+   abline(h=0, v=c(-1,1), col=c("gray","orange","orange"), lwd=c(1,2,2))
+# What is the two-sided p-value for a t-value of 2.991 when there are 48 degrees of freedom? 
+   pt(-abs(2.991), 48)*2 #gives the area more extreme than t=-1 for t-dist with 3 df.
+   
+#Change the area of the percentile to be 0.975 (the 97.5 percentile).
+
+
+#You should get the t-value of 2.011, which can be obtained in R by the code:
+# subtract the area from the t-value?
+# the area/percentile is the confidence value and the t-v is the critical value
+qt(1-0.05/2, 48)
+#What is the critical value for 90% confidence in a t distribution with 13 degrees of freedom? Show the answer using both the online applet and using R. 
+qt(1-.1/2, 13)
+tvalue how far your slop/int is from hyp one
+tstar the number of standard dev from mean to capture 95
+pt(-abs(-2.601), 48)*2
+
+cars.lm <- lm(dist ~ speed, data=cars)
+summary(cars.lm)
+confint(cars.lm)
+#b0+-t*sd (use tstar not t-value)
+#t-value relates to your data
+#tstar is a choice about how confident
+-17.5791+(-2.011*6.7584)
+-17.5791-(-2.011*6.7584)
+qt(.975,48) t* tstar
+
+```
+
+
 
 ##### Quizzes Hyp Param
 
