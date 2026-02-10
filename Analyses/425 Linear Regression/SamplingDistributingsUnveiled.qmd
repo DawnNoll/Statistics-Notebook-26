@@ -61,7 +61,7 @@ pander(mylm2, caption = "Sample 2")
 pander(mylm3, caption = "Sample 3")
 ```
 
-```{}
+```         
 ```
 
 -   A researcher investigated whether the number of cute animal photos stored on a phone could predict the total storage used.
