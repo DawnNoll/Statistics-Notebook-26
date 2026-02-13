@@ -6,24 +6,100 @@ date: "2026-02-13"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(car)
 ```
 
-## R Markdown
+## Model Selection
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+lm1 <- lm(Temp ~ Month, data=airquality) 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# transform
+boxCox(lm1) # says square or nothing
+lm2 <- lm(Temp^2 ~ Month, data=airquality)
 
-```{r cars}
-summary(cars)
+plot(Temp ~ Month, data=airquality)
+b <- coef(lm2)
+curve(sqrt(b[1] + b[2]*x), add=TRUE, col="skyblue")
+
+# model selection
+lm3 <- lm(Temp ~ Month + I(Month^2), data=airquality)
+b <- coef(lm3)
+
+curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE, col="hotpink")
 ```
 
-## Including Plots
+## How the quadratic model works
 
-You can also embed plots, for example:
+[Desmos](https://www.desmos.com/calculator)
+Beta1 controls the vertex by -Beta1/(2*Beta2)
+Beta2 controls concavity and steepness
+y=1 constant, y=-2x slope, y=x^2 quadratic
+Set the b0 first.
+b1 rocks the parabolas location in a parabolic form
+b2 is the only one that can open the parabola wider, negative flips it
+For cubic, b1 has a symmetric effect (slope of middle line portion), b2 kinda width but asymetric, b3 some spread and flip
+For the two lines, the x2 has to sample from 0s and 1s
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, echo=FALSE}
+# simulating the quadratic model
+#  ## Simulating Data from a Regression Model
+  ## This R-chunk is meant to be played in your R Console.
+  ## It allows you to explore how the various elements
+  ## of the regression model combine together to "create"
+  ## data and then use the data to "re-create" the line.
+
+  set.seed(101) #Allows us to always get the same "random" sample
+                #Change to a new number to get a new sample
+
+  n <- 30 #set the sample size
+
+  X_i <- runif(n, 15, 45) 
+    #Gives n random values from a uniform distribution between 15 to 45.
+
+  beta0 <- 3 #Our choice for the y-intercept. 
+
+  beta1 <- 1.8 #Our choice for the slope. 
+
+  sigma <- 2.5 #Our choice for the std. deviation of the error terms.
+
+
+  epsilon_i <- rnorm(n, 0, sigma) 
+    #Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
+
+  Y_i <- beta0 + beta1*X_i + epsilon_i 
+    #Create Y using the normal error regression model
+
+  fabData <- data.frame(y=Y_i, x=X_i) 
+    #Store the data as data
+
+  View(fabData) 
+  
+
+  #In the real world, we begin with data (like fabData) and try to recover the model that 
+  # (we assume) was used to created it.
+
+  fab.lm <- lm(y ~ x, data=fabData) #Fit an estimated regression model to the fabData.
+
+  summary(fab.lm) #Summarize your model. 
+
+  plot(y ~ x, data=fabData) #Plot the data.
+
+  abline(fab.lm) #Add the estimated regression line to your plot.
+
+
+  # Now for something you can't do in real life... but since we created the data...
+
+  abline(beta0, beta1, lty=2) 
+    #Add the true regression line to your plot using a dashed line (lty=2). 
+
+  legend("topleft", legend=c("True Line", "Estimated Line"), lty=c(2,1), bty="n") 
+    #Add a legend to your plot specifying which line is which.
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The quadratic model should be concave down.
+The maximum point (the vertex) should occur in the upper-right hand side of the plot.
+The quadratic model should exit the graph in both the bottom-left corner and the middle of the right-hand side.
+The number of dots in your plot should be similar to the number of dots in this plot, but don't worry about counting exactly.
+The spread of the dots in your plot should be similar to the spread of the dots in this plot.
+Your plot should have a legend of some sort, though you don't have to use the fancy math symbols that this one did. (Hint: Try ?plotmath if you want to try the symbols though.)
