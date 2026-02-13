@@ -33,6 +33,7 @@ Make sure to check whether the answer is positive or negative.<br>
 Make sure you put a zero before the decimal in Canvas.<br>
 Make sure you hit Ctrl+enter
 For SSE, etc load them into named variables, so it's easier to work with them ie, SSR/SSTO for R^2
+Use the applet to double check t p etc
 
 ## Basics
 P-value indicates how likely the sample results are assumingthe null hyp is true (It is not the probability the null hyp is correct and is not measure the size or importance of the result)
@@ -212,6 +213,7 @@ lm(Murder ~ Assault, data = USArrests) # Choose the assault estimate
 
 ### 02 ri...MSE
 Lots of notes: 425 Analysis/Residuals.qmd or RCheatSheetsbroken (next to this one)
+MSE estimates sigma^2
 
 ##### Class Code ri
 
@@ -996,22 +998,6 @@ cars.lm <- lm(dist ~ speed, data=cars)
 summary(cars.lm)
 confint(mylm)
 
-# compute t
-# using items from lm summary
-calculate_t <- function(estimate, std_error, number=0){
-  # number is the value from hypotheses eg. H0:B0=3)
-  (estimate - number)/std_error
-}
-
-# compute P-value use percentile function for t-dist pt(tvalue, DofF)
-# gives one-tail, so multiply by 2 for alt hyp with not equal
-# find p value 2 tailed where b1=3.932, sb1=.4155, H0=3
-t <- calculate_t(3.932, .4155, 3)
-2*pt(-abs(2.243), 48)
-# for confidence intervals use confint(mylm)
-# calc conf intvl for 1 or more param in fitted model. 
-predict(..., interval="prediction") #predict ind value
-predict(..., interval="confidence") # estimate location of mean y
 
 
 library(pander)
@@ -1026,38 +1012,78 @@ The area to the left is the percentile.
 Linear regression for  8 dots is 6 degrees of freedom.
 If we double the left value, it won't be more than half.
 pt stands for percentile of t (positive gives tv over 50%)
-t-value measures the size of the difference relative to the variation in your sample-- it is the difference represented in units of standarad error. A t-test puts the tsvalue in context of the calculated t-distribution so you can derive a probability.
+t-value measures the size of the difference relative to the variation in your sample-- it is the difference represented in units of standarad error. A t-test puts the t-value in context of the calculated t-distribution so you can derive a probability.
+tvalue how far your slop/int is from hyp one (your data)
+tvalue is a calculated value derived from sample data used to test a hypothesis. It measures evidence. <br>
+tstar is a critical value from the t-disribution table used to determine confidence intervals and thresholds for rejecting the null. It sets the boundardy for significance.<br>
+tstar the number of standard dev from mean to capture 95.
+p-value- this is what I've seen. What's the chance of that if my belief is true?
+confidence interval says the truth lives there (in interval). We'll capture the truth 95% of the time.
+Without standard error you have neither p-value nor conf int
+Standard error for statistics (we can't say it's deviating because it's a number we don't have), standard deviation for data (we know how much our numbers deviate from each other. We don't know how much the truth deviates.)
+logic of p-value is it helps you to know when you should re-evaluate your belief. You can't have probability until you have belief. If the coin was fair it has .5 chance
 
 ```{r}
+# compute t
+# using items from lm summary
+calculate_t_value <- function(estimate, std_error, number=0){
+  # number is the value from hypotheses eg. H0:B0=3)
+  (estimate - number)/std_error
+}
+
+# compute P-value use percentile function for t-dist pt(tvalue, DofF)
+# gives one-tail, so multiply by 2 for alt hyp with not equal
+
+# find p-value 2 tailed where b1=3.932, sb1=.4155, H0=3
+t_value <- calculate_t_value(3.932, .4155, 3)
+2*pt(-abs(t_value), 48)
+
+# find the two-tailed p-value for cars dist~speed
+t_value <- calculate_t_value(-17.58, 6.758)
+t_value # -2.601
+2*pt(-abs(t_value), 48) # p-value 0.0123
+
+# for confidence intervals use confint(mylm)
+# calc conf intvl for 1 or more param in fitted model. 
+predict(..., interval="prediction") #predict ind value
+predict(..., interval="confidence") # estimate location of mean y
+
 curve(dt(x, 3), from=-4, to=4, lwd=2)
    curve(dnorm(x), add=TRUE, col="gray")
    abline(h=0, v=c(-1,1), col=c("gray","orange","orange"), lwd=c(1,2,2))
-# What is the two-sided p-value for a t-value of 2.991 when there are 48 degrees of freedom? 
-   pt(-abs(2.991), 48)*2 #gives the area more extreme than t=-1 for t-dist with 3 df.
-   
-#Change the area of the percentile to be 0.975 (the 97.5 percentile).
 
+# What is the two-sided p-value for a t-value of 2.991 when there are 48 degrees of freedom? Or what is the two-sided probability.
+pt(-abs(2.991), 48)*2 #gives the area more extreme than t=-1 for t-dist with 3 df. *2 for both sides
 
-#You should get the t-value of 2.011, which can be obtained in R by the code:
-# subtract the area from the t-value?
-# the area/percentile is the confidence value and the t-v is the critical value
+qt()  # quantile is a value for t that gives you a certain percentile. qt() takes percentile and gives you the tvalue. qt() & pt() are inverse. pt() takes t-value, gives percentile(area)
+#Degrees of freedom 48. Change the area of the percentile to be 0.975 (the 97.5 percentile). You should get the t-value of 2.011, which can be obtained in R by the code:
 qt(1-0.05/2, 48)
+
+# Now unshade the left-tail, so just middle shaded. Area=.95. The area/percentile is the confidence value and the t-value is the critical value. Shading only the left tail is the percentile.
+
 #What is the critical value for 90% confidence in a t distribution with 13 degrees of freedom? Show the answer using both the online applet and using R. 
 qt(1-.1/2, 13)
-tvalue how far your slop/int is from hyp one
-tstar the number of standard dev from mean to capture 95
+
+
 pt(-abs(-2.601), 48)*2
 
-cars.lm <- lm(dist ~ speed, data=cars)
-summary(cars.lm)
-confint(cars.lm)
 #b0+-t*sd (use tstar not t-value)
 #t-value relates to your data
 #tstar is a choice about how confident
--17.5791+(-2.011*6.7584)
--17.5791-(-2.011*6.7584)
-qt(.975,48) t* tstar
+cars.lm <- lm(dist ~ speed, data=cars)
+summary(cars.lm)
+confint(cars.lm)
+# use std. error of slope/int and critical value of t-disribution (tstar) to get confidence levels
+# # estimate +or- tstar*stderror
+3.932409 + qt(c(0.025, 0.975), 48)*0.4155 #speed
 
+calculate_conf <- function(estimate, min=0.025, max=0.975,
+                           dof, std_error){
+  # min and max for qt function)
+  estimate + qt(c(min, max), dof)*std_error
+}
+calculate_conf(3.932409, dof=48, std_error=0.4155)
+confint(cars.lm)
 ```
 
 
@@ -1068,6 +1094,127 @@ qt(.975,48) t* tstar
 
 ```
 
+### 05 Confidence vs Prediction Intervals
+Average is only only useful when spread is small.
+##### Class Code Conf v Predict Int
+
+```{r}
+
+
+grid()
+?faithful
+predict(faith.lm, data.frame(eruptions=2))
+summary(faith.lm)
+# he used the rse to create a prediction interval. RSE=5.9 Two standard errors would be +- 12 minutes. Making it nice for humans +- 10 minutes which is about a 90 % confidence.
+
+# both below have 95% confidence level
+# predict tells you where you'll find the dot, if you're having a single experience you care about the prediction (buyer)
+# prediction is conf + about 2 residual standard errors (our data)
+# this code helps us accurately predict the next eruption
+predict(faith.lm, data.frame(eruptions=2),
+        interval="prediction") #wider interval, your predictions will be right more often
+
+# confidence tells you where the true law lies
+# when you'll have many experiences you care about the confidence (dealer). They care about the sum total.
+predict(faith.lm, data.frame(eruptions=2),
+        interval="confidence")
+
+
+# se=T is giving the confidence interval
+library(tidyverse)
+ggplot(faithful, aes(x=eruptions, y=waiting)) + 
+  geom_point( ) + 
+  geom_smooth(method="lm", se=T, formula=y~x) + 
+  geom_segment(x=2, xend=2, y=43.23, yend=66.63, color="orange", alpha=0.01, lwd=3)
+
+
+
+library(mosaic)
+ggplot(KidsFeet, aes(x=width, length)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=T, formula=y~x)
+```
+
+##### Class Code Plotting Prediction Int
+```{r}
+library(mosaic)
+library(tidyverse)
+
+u.lm <- lm(gasbill ~ temp, data=Utilities)
+summary(u.lm)
+
+# if you store the numbers you can index them
+# [1]=fit, [2]=lwr, [3]=upr in the plot
+pred <- predict(u.lm, data.frame(temp=30), 
+        interval="prediction")
+
+ggplot(Utilities, aes(x=temp, y=gasbill)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=T, formula=y~x) + 
+  geom_segment(x=30, xend=30, y=pred[2], yend=pred[3],
+               color="red", alpha=0.01, lwd=4) + 
+  theme_classic()
+
+# baseR version
+# plot(gasbill ~ temp, data=Utilities)
+# abline(u.lm)
+# lines(c(30,30), c(83.87, 189.46), lwd=4, 
+#       col=rgb(1,0,0, .5))
+
+
+library(car)
+boxCox(u.lm)
+
+u.lm.t <- lm(sqrt(sqrt(gasbill)) ~ temp, data=Utilities)
+b <- coef(u.lm.t)
+
+myx <- 70
+mypreds <- predict(u.lm.t, data.frame(temp=myx), 
+        interval="prediction")^4
+
+
+ggplot(Utilities, aes(x=temp, y=gasbill)) + 
+  geom_point() + 
+  #geom_smooth(method="lm", se=T, formula=y~x) + 
+  stat_function(fun=function(x) (b[1] + b[2]*x)^4) + 
+  geom_segment(x=myx, xend=myx, y=mypreds[2], yend=mypreds[3],
+               color="red", alpha=0.01, lwd=4) + 
+  theme_classic()
+
+# baseR version
+# plot(gasbill ~ temp, data=Utilities)
+# curve((b[1] + b[2]*x)^4, add=TRUE)
+# lines(c(myx,myx), c(mypreds[2], mypreds[3]), lwd=4, 
+#       col=rgb(1,0,0, .5))
+
+```
+##### Quizzes
+
+```{r, eval=FALSE}
+library(alr4)
+?BGSall
+View(BGSall)
+htlm <- lm(HT18~HT2, data = BGSall)
+summary(htlm)
+plot(data=BGSall, HT18~HT2)
+abline(htlm)
+
+
+t_value <- calculate_t_value(45.7966, 16.700, 0)
+2*pt(-abs(t_value), 134)
+t_value
+
+confint(htlm)
+plot(which:2)
+
+par(mfrow=c(1,3))
+plot(htlm, which = 1:2) #1,3 & 2
+plot(htlm$residuals) #5
+boxCox(lm) # lambda for Y
+
+predict(htlm, data.frame(HT2=83.8), interval = "prediction")
+
+```
 
 <br>
 

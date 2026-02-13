@@ -12,18 +12,12 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.height=
 
 library(tidyverse) 
 library(latex2exp)
-#library(cowplot)
+library(cowplot)
 library(pander)
-#library(mosaic) 
+#library(mosaic)
 
 theme_set(theme_minimal()) 
-```
 
-## Sampling Distributions of the Slope and Intercept of a Regression Line
-
-A sampling distribution is what you get when you take many samples of the same population. It essentially allows us to explore the behavior of some statistic. Our understanding of sampling distributions allow us to infer what is true for population and how wrong we could be.
-
-```{r samples, eval=TRUE}
 set.seed(616)
 N <- 5000
 beta0 <- 3
@@ -33,41 +27,59 @@ sigma <- 1.2
 
 X <- rnorm(N, 30, 5)
 Y <- beta0 + beta1*X + rnorm(N, 0, sigma)
+```
 
-#plot(Y ~ X, col=rgb(.1,.1,.1,.01), pch=16)
+## Sampling Distributions of the Slope and Intercept of a Regression Line
 
+A sampling distribution is what you get when you take many samples of the same population. It allows us to explore the behavior of some statistic. Our understanding of sampling distributions allow us to infer what is true for population and how wrong we could be.
+
+A researcher investigated whether the number of cute animal photos stored on a phone could predict the total storage used.
+$$
+    \underbrace{Y_i}_\text{Storage Used in GB} = \overbrace{\beta0}^\text{`r beta0` GB} + \overbrace{\beta1}^\text{`r beta1`} \underbrace{X_i}_\text{Photos} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{`r sigma` GB^2})
+    $$
+        
+The plots below show 3 separate samples from the population.
+```{r samples, eval=TRUE, fig.height=4}
+# create samples
 n <- 100
 mysample1 <- sample(N, n)
 mysample2 <- sample(N, n)
 mysample3 <- sample(N, n)
 
-plot(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16)
+# create lm for samples
 mylm1 <- lm(Y[mysample1] ~ X[mysample1])
-summary(mylm1)
-abline(mylm1, col="hotpink")
-
-plot(Y[mysample2] ~ X[mysample2], col="skyblue", pch=16)
 mylm2 <- lm(Y[mysample2] ~ X[mysample2])
-summary(mylm2)
-abline(mylm2, col="skyblue")
-
-plot(Y[mysample3] ~ X[mysample3], col="green", pch=16)
 mylm3 <- lm(Y[mysample3] ~ X[mysample3])
-summary(mylm3)
-abline(mylm3, col="green")
 
-pander(mylm1, caption = "Sample 1")
-pander(mylm2, caption = "Sample 2")
-pander(mylm3, caption = "Sample 3")
+# summarize samples
+# summary(mylm1)
+# summary(mylm2)
+# summary(mylm3)
+
+# set up for 3 plots
+#par(mfrow = c(1,3))
+
+# create plots
+plot(Y[mysample1] ~ X[mysample1], col="hotpink", pch=16,
+     main="Sample 1", xlab="Photos", ylab="Storage Used")
+abline(mylm1, col="hotpink")
+pander(mylm1, caption = "Sample 1",
+       covariate.labels = c("Intercept", "Photos"))
+
+plot(Y[mysample2] ~ X[mysample2], col="skyblue", pch=16,
+     main="Sample 2", xlab="Photos", ylab="Storage Used")
+abline(mylm2, col="skyblue")
+pander(mylm2, caption = "Sample 2",
+       covariate.labels = c("Intercept", "Photos"))
+
+plot(Y[mysample3] ~ X[mysample3], col="green", pch=16,
+     main="Sample 3", xlab="Photos", ylab="Storage Used")
+abline(mylm3, col="green")
+pander(mylm3, caption = "Sample 3",
+       covariate.labels = c("Intercept", "Photos"))
+
 ```
 
--   A researcher investigated whether the number of cute animal photos stored on a phone could predict the total storage used.
-
-    $$ \underbrace{Y_i}_\text{Storage Used in GB} = \overbrace{\beta_0}^\text{`r beta0` GB} + \overbrace{\beta1}^\text{`r beta1` } \underbrace{X_i}_\text{Photos} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0,\overbrace{\sigma^2}^\text{`r sigma` GB^2}) $$
-        
-
-
--   Show scatterplots and regression summary's for three different samples of data (of a given sample size) from your population. *shows all samples are wrong and none agree*
 
 -   Demonstrate how the sampling distribution is obtained for several thousand samples of both the slope and the intercept estimates and in your regression context.
 
