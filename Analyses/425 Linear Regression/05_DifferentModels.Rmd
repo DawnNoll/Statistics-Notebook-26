@@ -43,6 +43,7 @@ For the two lines, the x2 has to sample from 0s and 1s
 
 ```{r, echo=FALSE}
 # simulating the quadratic model
+#2.4, 0.8, -.09 (-6,10)
 #  ## Simulating Data from a Regression Model
   ## This R-chunk is meant to be played in your R Console.
   ## It allows you to explore how the various elements
@@ -52,22 +53,24 @@ For the two lines, the x2 has to sample from 0s and 1s
   set.seed(101) #Allows us to always get the same "random" sample
                 #Change to a new number to get a new sample
 
-  n <- 30 #set the sample size
+  n <- 100 #set the sample size
 
-  X_i <- runif(n, 15, 45) 
+  X_i <- runif(n, -6, 10) 
     #Gives n random values from a uniform distribution between 15 to 45.
 
-  beta0 <- 3 #Our choice for the y-intercept. 
+  beta0 <- 2.4 #Our choice for the y-intercept. 
 
-  beta1 <- 1.8 #Our choice for the slope. 
+  beta1 <- 0.8 #Our choice for the slope. 
+  
+  beta2 <- -0.09
 
-  sigma <- 2.5 #Our choice for the std. deviation of the error terms.
+  sigma <- .46 #Our choice for the std. deviation of the error terms.
 
 
   epsilon_i <- rnorm(n, 0, sigma) 
     #Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
 
-  Y_i <- beta0 + beta1*X_i + epsilon_i 
+  Y_i <- beta0 + beta1*X_i + beta2*X_i^2 + epsilon_i 
     #Create Y using the normal error regression model
 
   fabData <- data.frame(y=Y_i, x=X_i) 
@@ -79,18 +82,20 @@ For the two lines, the x2 has to sample from 0s and 1s
   #In the real world, we begin with data (like fabData) and try to recover the model that 
   # (we assume) was used to created it.
 
-  fab.lm <- lm(y ~ x, data=fabData) #Fit an estimated regression model to the fabData.
-
+  fab.lm <- lm(y ~ x + I(x^2), data=fabData) #Fit an estimated regression model to the fabData.
+  b <- coef(fab.lm)
   summary(fab.lm) #Summarize your model. 
 
-  plot(y ~ x, data=fabData) #Plot the data.
+  plot(y ~ x, data=fabData, pch=16) #Plot the data.
 
-  abline(fab.lm) #Add the estimated regression line to your plot.
+  #abline(fab.lm) #Add the estimated regression line to your plot.
 
 
   # Now for something you can't do in real life... but since we created the data...
 
-  abline(beta0, beta1, lty=2) 
+  #abline(beta0, beta1, lty=2) 
+  curve(beta0 + beta1*x + beta2*x^2, add=TRUE, lty=2)
+  curve(b[1]+b[2]*x+b[3]*x^2, add=TRUE)
     #Add the true regression line to your plot using a dashed line (lty=2). 
 
   legend("topleft", legend=c("True Line", "Estimated Line"), lty=c(2,1), bty="n") 
@@ -103,3 +108,34 @@ The quadratic model should exit the graph in both the bottom-left corner and the
 The number of dots in your plot should be similar to the number of dots in this plot, but don't worry about counting exactly.
 The spread of the dots in your plot should be similar to the spread of the dots in this plot.
 Your plot should have a legend of some sort, though you don't have to use the fancy math symbols that this one did. (Hint: Try ?plotmath if you want to try the symbols though.)
+
+```{r}
+challData <- data.frame(y=c( 62.0230141814838,65.3287607440202,63.0850996714816,64.7215795301002,63.5747270663006,53.702998209753,67.3864948748882,63.6127706891815,67.7168411573423,65.1905587130745,62.7203672543605,65.9786946907104,65.9747299777148,66.0078406427285,56.6621327894133,64.427226260792,59.6411522580869,54.7853006620191,62.5791157289376,64.2432705505488,64.6637314187692,66.0977643647167,66.1309505076381,63.2605451217536,65.8227827462007,65.2274912077561,67.8282521078083,65.7658686316158,62.295434407344,57.8409797705986 ),  x=c( 2.0260852817446,9.03627189621329,3.7256769053638,10.362243656069,11.1665419801138,-1.36220900854096,5.39347683265805,10.4938666215166,5.72009020252153,4.39260629424825,11.3956668348983,4.34667818667367,7.48598889634013,6.01686762738973,-0.559054442681372,10.5975495856255,1.44522828096524,-1.41116653056815,2.59089006995782,11.3630510880612,10.4535504248925,7.69924768619239,6.96709539275616,11.9197768727317,7.1798811876215,7.91942655434832,5.61692434595898,6.31798828626052,2.04823632212356,0.0595910623669624 ), x2=c( 1,0,1,0,0,1,1,0,1,1,0,1,0,0,1,0,1,1,1,0,0,0,0,0,0,0,1,0,1,1 ))
+
+View(challData)
+
+
+
+```
+sample(c(0,1), n, replace = TRUE)
+if you type in console beginning of previous code and control arrow up, it shows list of other times you'v used it.
+x2 is the choice of which law it will obey
+original is the baseline model, the rest is the changes to the model are attached to a switch term. B2 next to on /off it allows you to change the intercept by beta2 the beta3 allows us to change the slope term. Nonsensical to square x2 because it's the switch
+
+You can give data you don't use. You can put in switches you don't use. Extra x variables. Raise to the column power. can give as few points as possible, you could use transformations! Your goal is to become the weather and hide your secrets from all humanity
+
+One of the arts is don't squeeze hard, don't go to far. Torture the data long enough and it'll confess to anything. You can start wwithout a quadratic (overfitting)
+
+pairs(challData)
+pairs(challData, col=as.factor(challData$x2))
+1 pairs
+2 view data
+3 do lm summaries on opptions look at significance and rse
+4 then plot wit h curve the options
+5 can do diagnostic plot look at residuals
+# these two lines are the same one is short version
+lm21 <- lm(y~x*x2, data=challData)
+lm21 <- lm(y ~ x + x2 + x:x2, challData)
+
+plot(lm21)
+
