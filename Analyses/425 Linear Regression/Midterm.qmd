@@ -108,6 +108,7 @@ exp(b.log\[1\] + b.log\[2\]\*x)
 
 \# 12 kids feet regress girs width\~ length
 
+?? The key term is actual looking for an actual value. He said he can't figure out how to ask for confidence interval without using the word average
 \# Select the interval below that, according to your regression, we are 95% confident that it contains 95% of the actual widths of fourth-grade girl's feet that are 22 centimeters long.
 
 ?KidsFeet
@@ -178,3 +179,8 @@ lmlob <- lm(height ~ age, data=Loblolly)
 abline(lmlob)
 plot(lmlob, which=1)
 ```
+
+The confidence interval for intercept and slope calculated the same, but the calc for sd is different
+Intercept sd is the variability of the MSE plus the slope because the farther out the x the more variability in Y
+Slope MSE vertical variability over spread for slope (rise over run)
+The tvalue is the number of standard errors the sample is from the truth? pvalue is the probability we'll have a sample as extreme or more extreme if the hyp is true.We know samples can vary. We use our sample's variability to estimate the deviation in general. The pvalue tells us how surprisinng our samples is if the null hypothesis is true.
