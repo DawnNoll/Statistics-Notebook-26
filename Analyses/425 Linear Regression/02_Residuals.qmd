@@ -23,7 +23,7 @@ theme_set(theme_minimal())
 Basic terms of linear regression will be described using the data below which was collected from [timeanddate.com](#0). Please note that some squares near the right edge that would go off the plot are not drawn.
 
 ```{r, data}
-weather_hist <- read.csv("0110_Weather.csv")
+weather_hist <- read.csv("01_Weather.csv")
 weather_hist <- rename(weather_hist, PrevBar = bar.1)
 weather_hist <- rename(weather_hist, TempTwoAhead = Temp...2)
 ybar <- mean(weather_hist$Temp)
