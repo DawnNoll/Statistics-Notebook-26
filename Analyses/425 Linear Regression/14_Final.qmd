@@ -1,0 +1,103 @@
+---
+title: "Final"
+format: html
+editor: visual
+---
+
+```{r, setup}
+library(mosaic) 
+library(tidyverse) 
+library(car)
+```
+
+### 01 Simple Regression
+
+```{r, fig.height=3, fig.width=3}
+
+```
+
+<br>
+
+### 02 Residuals...MSE
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 03 Diagnostics Transformations
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 04 Sampling Distributions
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 05 Confidence Prediction
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 06 Different Models
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 07
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 08
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 09
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 10
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 11
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 12
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
+
+### 13
+
+```{r, fig.height=3, fig.width=3}
+```
+
+<br>
