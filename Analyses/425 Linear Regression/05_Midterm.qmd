@@ -1,0 +1,257 @@
+---
+title: Midterm
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+editor: visual
+---
+
+```{r, setup}
+library(mosaic)
+library(tidyverse)
+library(car)
+```
+
+### 01 Simple Regression
+
+For anything asking for the correct equation, slow down and double check everything carefully.
+
+7\) Suppose the impossible happened and May 1st of a certain year ended up being 0 degrees Fahrenheit in New York City.
+
+#What daily average wind speed (in miles per hour) does your regression model expect for such a day?
+
+```{r, fig.height=3, fig.width=3}
+?airquality
+predict(aq2lm, data.frame(Temp=0))
+# his solution was simpler, notice it said model, he ran the model
+# and then coef(model). The intercept is the prediction.
+
+```
+
+11\) Which of the following is a "best" statement to make when interpreting a regression slope? ans- The change in the average y-value per unit change in x. (The regression line models the average y-value for any given x-value. Since the slope is the change in the line as x changes by 1 unit, then the slope should be interpreted as the change in the average y-value (the line) for each unit change in x.)
+
+16\) Consider the linear model... ans $\beta_0 + \beta_1{X_i}$ describes the function relationship of the data to the true model.
+
+18\) A researcher develops a regression model to predict the highway miles per gallon of a vehicle based on the city miles per gallon of the vehicle. They run the following codes to do this.
+
+```{r}
+# this code in the question
+?mpg
+View(mpg)
+plot(hwy ~ cty, data = mpg)
+mpg.lm <- lm(hwy ~ cty, data=mpg)
+```
+
+The researcher is wondering how to best interpret the slope from their model.Select the statement below that best interprets the slope of their model.
+
+ans) The average highway gas mileage o vehicles increases by 1.337 miles per gallon for every 1 mpg increase in city gas mileage of the vehicle. (The slope is the change in the average Y-value for a 1 unit change in the x-value.)
+
+19\) Select the plot below that correctly deficts the least squares regression line for the data shown.
+
+ans) The least squares line should go through the avarege of Y-values as you move across the x-values. Only one plot does this.
+
+<br>
+
+### 02 Residuals...MSE
+
+1\) Perform a regression using the airquality dataset in R where the response variable is Ozone and the explanatory variable is Wind. What is the value of the MSE of this regression rounded to the nearest whole number?
+
+```{r, fig.height=3, fig.width=3}
+View(airquality) 
+aqlm <- lm(data=airquality, Ozone~Wind) 
+summary(aqlm)  
+sum( aqlm$res^2 ) / 114 # or square the RSE
+```
+
+2) Use the RailTrail data set in R from library(mosaic) to fit a regression to the following scatterplot. Compute the value of the residual for the solid dot labeled in the plot.
+
+```{r}
+View(RailTrail) 
+# my code RailTrail[25,] 
+rtlm <- lm(hightemp ~ lowtemp, data=RailTrail) 
+summary(rtlm) 
+61-predict(rtlm, data.frame(lowtemp=35)) 
+# rtlm$residuals[25] is more elegant 
+```
+
+22\) Which of the following describes SSR? ans) A measure of how much the regression line differs from the average of all the y-values.
+
+4\) What is the value of the MSE for the simple linear regression depicted in the plot? (residuals were written on plot, n was on plot)
+
+```{r, fig.height=3, fig.width=3}
+sum(6.6^2, 13.8^2, 9.8^2, 4.6^2, 2^2)/3
+# his
+sum( c(-6.6,13.8,-9.8,4.6,-2)^2 )
+MSE = SSE/(n-p) = 355.2 / (5 - 2) = 118.4
+
+```
+
+What is the value of the SSE according to the output shown below: (the summary output has a RSE of 1.875 on 22 degrees of freedom
+
+Using the residual standard error: 1c875\^2\*22
+
+Squaring the residual standard error gives MSE.\
+Multiplying MSE by (n-p) or 22 degrees of freedom gives back the SSE because MSE = SSE/(n-p) and sqrt(MSE) = residual standard error.
+
+<br>
+
+### 03 Diagnostics Transformations
+
+5\) The plot shows the solid orange dot in the plot has a fitted-value of 60 by looking at the x-axis of the plot. The vertical axis shows the residual axis which gives the point a -15 value by looking at the y-axis of the plot. Using the equation of a residual shows that the y-value can be found by adding the value of the residual to the fitted value. That gives a guess of 60 - 15 = 45 for the value of for the solid orange dot.
+
+```{r, fig.height=3, fig.width=3}
+```
+
+15\) Perform a linear regression that predicts the weight of chickens according to how old the chick is in days. Which of the following correctly diagnoses the appropriateness of this regression?
+
+Then, looking at the plot it should be clear that the variance of the residuals (in the vertical direction) is increasing from left to right. Also, from the Q-Q Plot, it is obvious that normality fails dramatically. Though there is a slight bend in the red smoothing line on the left of the graph, the red line is flat for most of the regression, witnessing that linearity has some problems, but nothing close to the problems with the variance and normality.
+
+```{r}
+plot(ChickWeight$weight ~ ChickWeight$Time)
+cwlm <- lm(ChickWeight$weight ~ ChickWeight$Time)
+plot(cwlm, which=1)
+
+qqPlot(cwlm$res)
+```
+
+21\) Use the Orange dataset in R to perform a linear regression of the circumfernce (y) of an orange tree according to the age of the tree (x). Which regression assumption is not satisfied for this regression? ans) The variance of the error terms does not appear to be constant.
+
+The Q-Q Plot looks great. Linearity is okay, even though the red line is a little jagged, the points don't seem to hold too closely to the line. Clearly the x-values are all fixed as they are "replicated" in the study. The variance shows a strong increasing trend in the vertical variability of the residuals as we move from left to right in the residuals plot.
+
+```{r}
+plot(circumference ~ age, data=Orange)
+olm <- lm(circumference ~ age, data=Orange)
+plot(olm, which=1)
+qqPlot(olm$res)
+```
+
+24\) Consider the scatterplot shown below. Create this scatterplot in R and add the regression line to the plot.
+
+At which age does the actual average of the dots seem to be furthest from the line?
+
+Hint, if you are having a hard time deciding, try looking at a diagnostic plot. The red line of your first diagnostic plot shows the average of each set of dots and their relationship to the regression line, which is depicted by the dotted gray line. Also, keep in mind that "being far away" in a statistical sense depends not only on the actual distance but also on the...
+
+The red line is furthest from the gray line for the first and last groups, ages 3 and 20. Since only age 3 is an option in the list above, it is the best answer.
+
+```{r}
+loblm <- lm(height ~ age, data=Loblolly)
+abline(loblm)
+plot(loblm, which=1)
+```
+
+9\) Use the mtcars data set in R to perform a log(Y) transformation regression of mpg predicted by wt.
+
+```{r}
+# log transform is lamba of 0
+lambda <- 0
+mtloglm <- lm(log(mpg)~wt, data=mtcars)
+predict(mtloglm, data.frame(wt=2))
+
+## Needs retransformed
+exp(3.288344)
+# or exp the line above exp(predict(mtloglm, data.frame(wt=2))) 
+```
+
+13\) The solid orange dot shown in the scatterplot below corresponds with which point on the residuals vs. fitted plot?
+
+I predicted for the Chrysler, put in the wt and got out the estimated mpg for the y value (note the actual y was much bigger, but that plot uses the fitted y)
+
+```{r}
+plot(mpg ~ wt, data=mtcars, main="mtcars data set")
+points(mpg ~ wt, data=mtcars[17,], pch=16, col="orange", cex=1.2)
+mt.lm <- lm(mpg ~ wt, data=mtcars)
+abline(mt.lm)
+plot(mt.lm, which=1)
+points(mt.lm$res[17] ~ mt.lm$fit[17], pch=16, cex=1.2, col="orange")
+```
+
+14\) Consider the following scatterplot. Apply an appropriate Y transformation to the data shown in the plot.
+
+```{r}
+aqtrlm <- lm(Ozone ~ Temp, data=airquality)
+boxCox(aqtrlm) # boxCox shows .25 which is sqrt(sqrt())
+
+aqtrlm <- lm(sqrt(sqrt(Ozone)) ~ Temp, data=airquality)
+summary(aqtrlm) # then find the R^2
+# no back tranform needed since it wants the R^2 on the transformed data
+```
+
+23\) Consider transforming *Y* in the regression of stopping distance on speed using the cars dataset in R. Which of the following shows the “best” *Y-*transformation possible for this data in the original units? The plot images had one that started too far in. One that was exponential. One with a slight curve. The best was the straight line.
+
+<br>
+
+### 04 Sampling Distributions
+
+20\) What is the p-value for the missing entry in the output below? Note: the sample size for this regression was n=30.
+
+where pt(estimate / std. error, n - p)\*2 where p is the number of parameters being estimated by the model, which is 4. (Recognizing the 4 is the hardest part.)
+
+```{r}
+pt(-109.736/374.404, 30-4)*2
+```
+
+6\) Suppose a researcher developed the theory that each one degree increase in daily average temperatures reduced average daily wind speed by 1/6 a mile per hour.
+
+```{r, fig.height=3, fig.width=3}
+aq2lm <- lm(data=airquality, Wind~Temp)
+summary(aq2lm)
+calculate_t_value <- function(estimate, std_error, number=0){
+  # number is the value from hypotheses eg. H0:B0=3)
+  (estimate - number)/std_error
+}
+t_value <- calculate_t_value(-0.17046, 0.02693, -0.167)
+2*pt(-abs(t_value), 151)
+```
+
+<br>
+
+### 05 Confidence Prediction
+
+8\) A regression is performed, and the following output obtained. Use this output to create a 95% confidence interval for the true y-intercept (B0) corresponding to this regression.
+
+```{r, fig.height=3, fig.width=3}
+calculate_conf <- function(estimate, min=0.025, max=0.975,
+                           dof, std_error){
+  # min and max for qt function)
+  estimate + qt(c(min, max), dof)*std_error
+}
+
+calculate_conf(1.9845, dof=37, std_error=0.3521)
+```
+
+10\) Run the code in R (first 2 lines below). Fit the following regression model (y_i = high_temp, x_i = high_dewpt.
+
+Select the plot below that correctly depicts (for the above model) the 95% prediction interval for the high temperature when the high dew point is 80.
+
+```{r}
+library(mosaic) #contains the Weather data
+plot(high_temp ~ high_dewpt, data=Weather)
+plot(high_temp ~ high_dewpt, data=Weather, ylim=c(0,120))
+temp_lm <- lm(high_temp ~ high_dewpt, data=Weather)
+abline(temp_lm)
+predict(temp_lm, data.frame(high_dewpt=80), interval="prediction")
+
+```
+
+12\) Suppose you are asked to help decide how wide (in cm) kid's shoes should be for fourth grade girls with nfoot lengeths of 22 centimeters using the KidsFeet dataset, which contains data about fourth grade girls and boys.
+
+Perform a meaningful regression on the girls daa provided in the KidsFeet data set. Select the interval below that, according to your regression, we are 95% confident that it contains the 95% of the actual widths of fourth-grade girl's feet that are 22 cm long.
+
+Note: he said he didn't know how to ask for confidence without using the word average, so it isn't the confidence interval.
+
+```{r}
+girlsFeet <- filter(KidsFeet, sex=="G")
+plot(width ~ length, data=girlsFeet)
+girls.lm <- lm(width ~ length, data=girlsFeet)
+predict(girls.lm, data.frame(length=22), interval="prediction")
+```
+
+```{r, fig.height=3, fig.width=3}
+plot(height ~ age, data=Loblolly)
+lmlob <- lm(height ~ age, data=Loblolly)
+abline(lmlob)
+plot(lmlob, which=1)
+```
+
+The confidence interval for intercept and slope calculated the same, but the calc for sd is different Intercept sd is the variability of the MSE plus the slope because the farther out the x the more variability in Y Slope MSE vertical variability over spread for slope (rise over run) The tvalue is the number of standard errors the sample is from the truth? pvalue is the probability we'll have a sample as extreme or more extreme if the hyp is true.We know samples can vary. We use our sample's variability to estimate the deviation in general. The pvalue tells us how surprisinng our samples is if the null hypothesis is true.
