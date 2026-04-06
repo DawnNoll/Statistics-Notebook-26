@@ -996,7 +996,7 @@ State the estimated values for $\beta_0$, $\beta_1$, and $\sigma$ for this regre
 
 4(c) {}
 Create a residuals vs fitted-values plot and a Q-Q Plot of the residuals for this regression. 
-```{r}
+```{r, fig.width=4, fig.height=4}
 plot(o.lm, which = 1:2) #1,3 & 2
 plot(o.lm$residuals) #5
 ```
@@ -1012,6 +1012,7 @@ linearity only slightly off, but no constant variance, qqplot okay, not so sure 
 Perform a Box-Cox analysis of the regression. Which Y-transformation is suggested?
 
 ```{r}
+# lambda = .5 (sqrt)
 boxCox(o.lm)
 ```
 
@@ -1020,30 +1021,42 @@ Type your answer here...
 </div> 
 
  
-### Part (f) {}
+4(f) {}
 
 Perform a regression with the transformed y-variable. Plot the regression in the transformed units. Diagnose the fit of the regression on the transformed data.
 
-<div class="YourAnswer">
+Ans Linearity is more violated in the transformed regression than it was in the original units. Normality is more violated in the transformed regression than it was in the original units.
 
-```{r}
-#Type your code here...
+```{r, fig.height=4,fig.width=4}
+#lm(sqrt(Y) ~ X)
+o.lm.sqrt <- lm(sqrt(circumference)~age, data=Orange)
+summary(o.lm.sqrt)
+b <- coef(o.lm.sqrt)
+
+ggplot(data=Orange, mapping=aes(y=circumference, x=age)) + geom_point(pch=16) +
+geom_smooth(method="lm", formula=y~x, se=F) +
+stat_function(fun=function(x) (b[1] + b[2]*x)^2, aes(color="sqrt(Y)")) +
+  theme_minimal()
+
+plot(o.lm.sqrt, which = 1:2) #1,3 & 2
+plot(o.lm.sqrt$residuals)
 ```
 
-</div> 
 
 
-### Part (g) {}
+
+4(g) {}
 
 Write out the fitted model for $\hat{Y}_i'$. Then solve the transformed model back into the original units for $\hat{Y}_i$. Then compute the following.
 
 When $X_i = 500$, then $\hat{Y}_i = \ldots$.
 
-<div class="YourAnswer">
 
 $$
-  \hat{Y}_i' = ...
-$$
+  \hat{Y}_i' = 5.3408 + 0.0055
+$$ 
+
+rounded to 4 places
 
 
 Extra possible from 2023
