@@ -49,7 +49,7 @@ plot(utlm$residuals)
 
 ### Part (a)
 
-Add the estimated regression function to the scatterplot above and state the function below.
+Add the estimated regression function to the scatterplot above and state the function below. Ans Quadratic seems best
 
 <div class="YourAnswer">
 
@@ -65,24 +65,14 @@ $$
 Diagnose the appropriateness of this regression model. How well does it fit the data? 
 
 <span style="font-size:.8em;">  From the residuals vs. fitted values plot, the variance   
-   to be constant and the model   
-  meet the linearity requirement. Further, points 2, 65, and   
-4
- are all possible outliers that should be checked for errors in encoding and possibly removed from the regression.
+does not appear to be constant and the model should be considered to meet the linearity requirement. Further, points 2, 65, and 4 are all possible outliers that should be checked for errors in encoding and possibly removed from the regression.
 
-  From the Q-Q Plot of the residuals, normality  
-   with the points going out of the "normality boundary lines" at the "norm quantiles" of   
--2
-  on the left and   
-1
-  on the right of the graph.
+  From the Q-Q Plot of the residuals, normality is clearly violated,
+   with the points going out of the "normality boundary lines" at the "norm quantiles" of   -2 on the left and 1 on the right of the graph.
 
- 
 
-  From the Residuals vs Order plot we see a possible pattern. Using View(Utilities) we see that the data is sorted by the   
-year
- column (enter the name of the column the Utilities data is sorted by). It is reasonable to assume that the error terms    
-   independent because of some consistent, though modest changes over time in the data.</span>
+  From the Residuals vs Order plot we see a possible pattern. Using View(Utilities) we see that the data is sorted by the year column (enter the name of the column the Utilities data is sorted by). It is reasonable to assume that the error terms    
+are not independent because of some consistent, though modest changes over time in the data.</span>
 
 <div class="YourAnswer">
 
@@ -98,7 +88,9 @@ View(Utilities)
 
 ### Part (c)
 
-What range of possible gas bill amounts do you predict for the September bill? How confident are you in your prediction?
+What range of possible gas bill amounts do you predict for the September bill? How confident are you in your prediction? ans   At 95% confidence, our model shows that September's possible gas bill amounts range from   
+0
+ (because bill's can't be negative) to the upper limit with a predict of fit.
 
 <div class="YourAnswer">
 
@@ -121,10 +113,10 @@ Compute the mean of just September's gas bills and draw a horizontal reference l
 sept <- Utilities %>%
   filter (month == "9")
 mean(sept$gasbill)
-38.84658-mean(sept$gasbill)
+38.84658-mean(sept$gasbill) # 16.03158
 ```
 
-Type your answer here...
+So which one is right? Good question. While we haven't seen a lot of variability in past September bills for this data set, we do see high variability in many of the other months. It isn't unreasonable to assume that September could be prone to this same variability. The regression accounts for the variability of all months. Using just September isolates the data to just September's history, providing a more narrow view of the data. However, this particular regression model doesn't seem to perform very well on months 1, 9 and 10 (January, September and October) when it comes to capturing the average of those months. So... hard to say. But more work is needed to really capture the essence of this data.
 
 </div>
 
@@ -166,7 +158,23 @@ Plot the data and your fitted regression model.
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+mt2lines.lm <- lm(mpg~qsec + am + qsec:am, data=mtcars)
+b <- coef(mt2lines.lm)
+# Then b will have 4 estimates:
+# b[1] is the estimate of beta_0: -9.0099
+# b[2] is the estimate of beta_1:  1.4385
+# b[3] is the estimate of beta_2: -14.5107
+# b[4] is the estimate of beta_3: 1.3214
+
+ggplot(mtcars, aes(y=mpg, x=qsec, color=factor(am))) +
+  geom_point(pch=21, bg="gray") +
+  #geom_smooth(method="lm", se=F) + #easy way, but only draws the full interaction model. The manual way using stat_function (see below) is more involved, but more dynamic.
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") + #am==0 line
+  stat_function(fun = function(x) (b[1]+b[3]) + (b[2]+b[4])*x, color="orange") + #am==1 line 
+  scale_color_manual(name="Transmission (am)", values=c("skyblue","orange")) +
+  labs(title="Two-lines Model using mtcars data set") 
+
+summary(mt2lines.lm)
 ```
 
 </div>
@@ -179,7 +187,24 @@ State the fitted regression model.
 <div class="YourAnswer">
 
 $$
- ...
+ \underbrace{Y_i}_\text{mpg} \underbrace{=}_{\sim}
+\overbrace{\beta_0}^{\stackrel{\text{y-int}}{\text{baseline}}} +
+\overbrace{\beta_1}^{\stackrel{\text{slope}}{\text{baseline}}}
+\underbrace{X_{1i}}_\text{qsec} +
+\overbrace{\beta_2}^{\stackrel{\text{change
+in}}{\text{y-int}}}  \underbrace{X_{2i}}_\text{am} +
+\overbrace{\beta_3}^{\stackrel{\text{change in}}{\text{slope}}}
+\underbrace{X_{1i}X_{2i}}_\text{qsec:am} + \epsilon_i
+$$
+
+$$
+ \underbrace{Y_i}_\text{mean mpg} =
+-9.0099 +
+1.4385
+\underbrace{X_{1i}}_\text{qsec} +
+-14.5107  \underbrace{X_{2i}}_\text{am==1} +
+ 1.3214
+\underbrace{X_{1i}X_{2i}}_\text{qsec:am} + \epsilon_i
 $$
 
 </div>
@@ -191,7 +216,7 @@ Use `summary(...)` to perform an appropriate t test to determine if the interact
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+0.07012
 ```
 
 Type your answer here...
@@ -207,8 +232,10 @@ Diagnose the appropriateness of this regression model. How well does it fit the 
 
 <div class="YourAnswer">
 
-```{r}
-#Type your code here...
+```{r, eval=FALSE, fig.height=4, fig.width=}
+plot(mt2lines.lm, which=1:2)
+plot(mt2lines.lm$residuals)
+# okay for linearity, fine for constant variance, normality-a few outliers but otherwise okay, independence sure
 ```
 
 Type your answer here...
@@ -223,7 +250,29 @@ State the $R^2$ and residual standard error values for this model. What do these
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+# R2 0.6923 (adjusted R2 because of the number of params)
+# R2 Measures the proportion of variability in the gas mileage of vehicles that is explained by the quarter mile time and transmission type of the vehicle.
+# 3.343 Measures the variability (standard deviation) of gas mileage, in units of mpg, around the average gas mileage predicted for a vehicles with a certain quarter mile time and transmission type
+
+
+
+#### part f
+# Sometimes, when an interaction term is not significant, we may choose to use a reduced regression model that drops the interaction term. Mathematically this would turn the full two-lines model into this simpler mathematical model:
+# same as above but no B3X1iX2i
+
+mt2linesnoint.lm <- lm(mpg~qsec + am, data=mtcars)
+b <- coef(mt2linesnoint.lm)
+
+# When you drop the interaction term, the second half of the second line is no long the first slope plus the interaction slope (b[2] + b[4])*x, it's just the original slope b[2]*x
+ggplot(mtcars, aes(y=mpg, x=qsec, color=factor(am))) +
+  geom_point(pch=21, bg="gray") +
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") + #am==0 line
+  stat_function(fun = function(x) (b[1]+b[3]) + b[2]*x, color="orange") + #am==1 line 
+  scale_color_manual(name="Transmission (am)", values=c("skyblue","orange")) +
+  labs(title="Two-lines Model using mtcars data set") 
+
+summary(mt2linesnoint.lm)
+
 ```
 
 Type your answer here...
@@ -253,7 +302,22 @@ Plot the data and your fitted regression model.
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+
+mt2qs.lm <- lm(qsec~disp +I(disp^2) + am + disp:am + I(disp^2):am, data=mtcars)
+b <- coef(mt2qs.lm)
+summary(mt2qs.lm)
+format(6.607e-05) #can un scientific notation just move it positive or negative that number of spots  2.619e+01 is 26.9, -2.926e-03 is -0.002926, if it's e+00 it's just the number
+# CHECK CLOSELY so you don't turn a positive with an e-xx to a negative number--only move the decimal
+
+ggplot(mtcars, aes(y=mpg, x=qsec, color=factor(am))) +
+  geom_point(pch=21, bg="gray") +
+  #geom_smooth(method="lm", se=F) + #easy way, but only draws the full interaction model. The manual way using stat_function (see below) is more involved, but more dynamic.
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") + #am==0 line
+  stat_function(fun = function(x) (b[1]+b[3]) + (b[2]+b[4])*x, color="orange") + #am==1 line 
+  scale_color_manual(name="Transmission (am)", values=c("skyblue","orange")) +
+  labs(title="Two-lines Model using mtcars data set") 
+
+ Typically, we will drop the "least significant term" or term with the highest p-value first, then see if that changes the p-values of the other terms or not. Usually we will not drop all significant terms all at once. This is sometimes called a "backwards step-wise" model selection procedure.
 ```
 
 Type your answer here...
@@ -267,7 +331,7 @@ State the fitted regression model.
 <div class="YourAnswer">
 
 $$
-  \hat{Y}_i = ...
+  \hat{Y}_i = 26.19 - .04937X_1i + 0.0000661X_1i^2 -3.63X_2i - 0.0029263X_1iX_2i+.00001866X_1i^2 X_2i
 $$
 
 </div>
@@ -280,7 +344,7 @@ Use `summary(...)` to perform appropriate t tests to determine which interaction
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+#Type your code here...the summary is in a It said to do it for B4 and B4. Then asked which could be removed the answer was either term not both (I guess because you have to drop one and check for the significance of the other before deciding)
 ```
 
 </div>
@@ -294,8 +358,9 @@ Diagnose the appropriateness of this regression model. How well does it fit the 
 
 <div class="YourAnswer">
 
-```{r}
-#Type your code here...
+```{r, eval=FALSE, fig.width=4, fig.height=4}
+plot(mt2qs.lm, which=1:2)
+plot(mt2qs.lm$residuals)
 ```
 
 Type your answer here...
@@ -309,7 +374,8 @@ Drop the "least significant" term from the model. This is a silly statement real
 <div class="YourAnswer">
 
 ```{r}
-#Type your code here...
+mt2qs2.lm <- lm(qsec~disp +I(disp^2) + am + I(disp^2):am, data=mtcars)
+summary(mt2qs2.lm)
 ```
 
 Type your answer here...
