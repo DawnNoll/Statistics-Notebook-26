@@ -1622,7 +1622,7 @@ mypreds <- predict(u.lm.t, data.frame(temp=myx),
 
 ggplot(Utilities, aes(x=temp, y=gasbill)) + 
   geom_point() + 
-  #geom_smooth(method="lm", se=T, formula=y~x) + 
+  geom_smooth(method="lm", se=T, formula=y~x) + 
   stat_function(fun=function(x) (b[1] + b[2]*x)^4) + 
   geom_segment(x=myx, xend=myx, y=mypreds[2], yend=mypreds[3],
                color="red", alpha=0.01, lwd=4) + 
@@ -1681,6 +1681,8 @@ ggplot(data=wblake, aes(y=Scale, x=Length)) +
   scale_y_continuous(n.breaks = 7) +
   geom_smooth(method="lm", se=T, formula=y~x)
 plot(wb.lm, which=1:2)
+
+
 boxCox(wb.lm)
 wb.lm.sqrt <- lm(sqrt(Scale)~Length, data=wblake)
 b <- coef(wb.lm.sqrt)
@@ -1690,32 +1692,57 @@ ggplot(data=wblake, aes(y=sqrt(Scale), x=Length)) +
   geom_smooth(method="lm", se=T, formula=y~x)
 summary(wb.lm.sqrt)
 plot(wb.lm.sqrt, which=1:2)
-# The answer was the diagnostic plots looked about he same, but they looked worse to me.
+# The answer was the diagnostic plots looked about he same, but they looked worse to me. He said he doesn't go by the red line, he squints and tries to see what the bulk of the dots are doing.
 # original scale
 ggplot(data=wblake, aes(y=Scale, x=Length)) +
   geom_point(col=rgb(.2,.2,.2,.2)) + 
   scale_y_continuous(n.breaks = 7) +
   scale_x_continuous(n.breaks = 4) +
-  geom_smooth(method="lm", se=T, formula=y~x) +
+  geom_smooth(method="lm", se=F, formula=y~x) +
   stat_function(fun=function(x) (b[1] + b[2]*x)^2, aes()) +
+  labs(title="Radius of Key Scale Increase by Length of Fish") +
   theme_minimal()
 # Where the x-axis ranges from    to   and the y-axis ranges from    to  
 #Place two prediction intervals for the Scale radius when the Length of the fish is 250 on your scatterplot of the data in the original units.
 
 #    Show the prediction interval from the original regression in the original units.
 #    Show the prediction interval from the transformed regression back on the original units.
-predict(wb.lm, data.frame(Length=250),
+pred.o <- predict(wb.lm, data.frame(Length=250),
         interval="prediction")
-predict(wb.lm.sqrt, data.frame(Length=sqrt(250)),
-        interval="prediction")
+pred.t <- (predict(wb.lm.sqrt, data.frame(Length=250),
+        interval="prediction"))^2 # when you need the transformed prediction interval in the original units (for a plot for example), you have to take the output and do the same as you do for the plot (i.e. reverse it--Do Not do it to predict's data.frame)
 
-
-#### CLASS ACTIVITY linear model summary due April 6th
-
-
+ggplot(data=wblake, aes(y=Scale, x=Length)) +
+  geom_point(col=rgb(.2,.2,.2,.2)) + 
+  geom_smooth(method="lm", se=F, formula=y~x, color="gray") +
+  stat_function(fun=function(x) (b[1] + b[2]*x)^2, color="skyblue") +
+  geom_vline(xintercept = 250, linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = pred.o[1], linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = pred.o[2], linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = pred.o[3], linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = pred.t[1], linetype = "dashed", color = "skyblue") +
+  geom_hline(yintercept = pred.t[2], linetype = "dashed", color = "skyblue") +
+  geom_hline(yintercept = pred.t[3], linetype = "dashed", color = "skyblue") +
+  labs(title="Radius of Key Scale Increase by Length of Fish") +
+  theme_minimal()
 
 
 ```
+
+
+
+### 06 Different Types of Regression Models
+
+##### Class Code: Model Types
+
+
+##### Quizzes: Model Types
+
+```{r, eval=FALSE, fig.height=4, fig.width=4}
+
+
+```
+
 
 <br>
 ### 14 
