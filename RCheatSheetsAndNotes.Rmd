@@ -1516,10 +1516,18 @@ summary(cl2.lm)
 boxCox(cl2.lm)
 # to figure out which x transformation use the images in the text under x transformations (this needed log(x))
 cl2.lm.trans <- lm(sqrt(sqrt(tsales))~log(hourspw), data=Clothing2)
-b <- coef(c12.lm.trans)
+b <- coef(cl2.lm.trans)
 # # Plotting with transformations in aesthetics
-ggplot(data=Clothing2, mapping=aes(y=tsales, x=hourspw)) + geom_point(color = "orange", pch=16) +
-geom_smooth(method="lm", formula=y~x, se=F) +
+ggplot(data=Clothing2, mapping=aes(y=sqrt(sqrt(tsales)), x=log(hourspw))) + 
+  geom_point(pch=16) +
+  geom_smooth(method="lm", formula=y~x, se=F) +
+  #scale_y_continuous(n.breaks = 7) +
+  theme_minimal()
+
+# back in normal #don't know whether this is correct because it wasn't watching for this
+ggplot(data=Clothing2, mapping=aes(y=tsales, x=hourspw)) + 
+  geom_point(pch=16) +
+  geom_smooth(method="lm", formula=y~x, se=F) +
   stat_function(fun = function(x) (b[1] + b[2] * log(x))^4, color = "red") +
   theme_minimal()
 
@@ -1687,11 +1695,57 @@ plot(wb.lm.sqrt, which=1:2)
 ggplot(data=wblake, aes(y=Scale, x=Length)) +
   geom_point(col=rgb(.2,.2,.2,.2)) + 
   scale_y_continuous(n.breaks = 7) +
+  scale_x_continuous(n.breaks = 4) +
   geom_smooth(method="lm", se=T, formula=y~x) +
-  stat_function(fun=function(x) (b[1] + b[2]*x)^2, aes()) 
+  stat_function(fun=function(x) (b[1] + b[2]*x)^2, aes()) +
+  theme_minimal()
+# Where the x-axis ranges from    to   and the y-axis ranges from    to  
+#Place two prediction intervals for the Scale radius when the Length of the fish is 250 on your scatterplot of the data in the original units.
+
+#    Show the prediction interval from the original regression in the original units.
+#    Show the prediction interval from the transformed regression back on the original units.
+predict(wb.lm, data.frame(Length=250),
+        interval="prediction")
+predict(wb.lm.sqrt, data.frame(Length=sqrt(250)),
+        interval="prediction")
+
+
+#### CLASS ACTIVITY linear model summary due April 6th
+
+
+
+
 ```
 
 <br>
+### 14 
+standard error hint "residual standard error"
+1 Residuals (normality of residuals is the least of our problems) This section can tell us whether there's skew, the median should be around zero (the mean is always 0 for an lm)
+2 when x is 0
+3 change in the average y The regression line is the average y. We know only about the average we will miss because the dots are almost never on the line,
+4 measures the sample distributions standard deviation, all samples vary. This is a guess as to how much variation all samples would have. The saving grace is the standard error, finding common ground. If you feel a deep sense of love for these numbers you're starting to understand statistics.
+5
+6 number of standard errors that the estimate is the null
+7
+8 t=b0-B0/S_b0
+9
+10 We expect the dots to vary by about 15pts on average from the line. This accounts for the individuality of the points. (I'm always wrong but I'm close.)
+11
+12 R2 It's the proportion of variance in Y explained by the data. (SSE is the unexplained variance)
+13 Adjusted R-squared has a penalty 1 - (n-1) SSE/ (n-p)SSTO a 1 param model lmm(y~1) If you use a lot of parameters and get an adj R2 that's good. You're doing well because it cancelled out the penality
+14 last is the model as the whole doing better than y-bar
+15
+16 A quadratic has I think 3 terms
+17 bottom row is only helpful in multiple regression
+p-value in summarries assuming all other variables are sig and meaningful. Depends on the context of what's present
+
+remind how to find things in pair plots
+go back to two theory assignments, skills quizzes, practice test, 
+```{r}
+Linear Regression Summary
+
+
+```
 
 ## Code notes
 
