@@ -1,0 +1,1430 @@
+---
+title: "Code 2023"
+author: "Dawn Galloway"
+date: "4/7/2026"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+02-01 predict int
+library(mosaic)
+library(tidyverse)
+
+lm.u <- lm(gasbill ~ temp, data=Utilities)
+summary(lm.u)
+
+lm.u.sqsq <- lm(sqrt(sqrt(gasbill)) ~ temp, data=Utilities)
+summary(lm.u.sqsq)
+plot(lm.u.sqsq, which=1)
+
+b <- coef(lm.u.sqsq)
+
+pred.u <- predict(lm.u, data.frame(temp=30), interval="prediction")
+pred.u.sqsq <- predict(lm.u.sqsq, data.frame(temp=30), interval="prediction")^4
+
+pred.u2 <- predict(lm.u, data.frame(temp=70), interval="prediction")
+pred.u.sqsq2 <- predict(lm.u.sqsq, data.frame(temp=70), interval="prediction")^4
+
+
+plot(gasbill ~ temp, data=Utilities)
+abline(lm.u, col="hotpink")
+abline(225.7804 + 26.45, -2.9704, lty=2, col="hotpink")
+abline(225.7804 - 26.45, -2.9704, lty=2, col="hotpink")
+curve((b[1] + b[2]*x)^4, add=TRUE, col="skyblue", lwd=2)
+curve((b[1]+0.2258 + b[2]*x)^4, add=TRUE, col="skyblue", lty=2, lwd=2)
+curve((b[1]-0.2258 + b[2]*x)^4, add=TRUE, col="skyblue", lty=2, lwd=2)
+abline(h=pred.u, lty=2, col="hotpink")
+abline(h=pred.u.sqsq, lty=2, col="skyblue")
+abline(v=c(30,70), lty=2)
+abline(h=pred.u2, lty=2, col="hotpink")
+abline(h=pred.u.sqsq2, lty=2, col="skyblue")
+
+plot(lm.u, which=1)
+View(Utilities)
+
+library(car)
+boxCox(lm.u)
+
+
+
+ggplot(Utilities, aes(x=temp, y=gasbill)) + 
+  geom_point() + 
+  geom_smooth(method="lm", formula=y~x, se=T) +
+  stat_function(fun=function(x) (b[1] + b[2]*x)^4) + 
+  geom_segment(aes(x=30,xend=30, y=pred.u[2], yend=pred.u[3]), alpha=0.01, lwd=3, col="hotpink") + 
+  geom_segment(aes(x=30,xend=30, y=pred.u.sqsq[2], yend=pred.u.sqsq[3]), alpha=0.01, lwd=2, col="skyblue") + 
+  geom_segment(aes(x=70,xend=70, y=pred.u2[2], yend=pred.u2[3]), alpha=0.01, lwd=3, col="hotpink") + 
+  geom_segment(aes(x=70,xend=70, y=pred.u.sqsq2[2], yend=pred.u.sqsq2[3]), alpha=0.01, lwd=2, col="skyblue") 
+  
+
+```
+
+
+```{r}
+# back transform
+library(mosaic)
+library(tidyverse)
+
+lm.u <- lm(gasbill ~ temp, data=Utilities)
+summary(lm.u)
+
+lm.u.sqsq <- lm(sqrt(sqrt(gasbill)) ~ temp, data=Utilities)
+summary(lm.u.sqsq)
+plot(lm.u.sqsq, which=1)
+
+b <- coef(lm.u.sqsq)
+
+pred.u <- predict(lm.u, data.frame(temp=30), interval="prediction")
+pred.u.sqsq <- predict(lm.u.sqsq, data.frame(temp=30), interval="prediction")^4
+
+pred.u2 <- predict(lm.u, data.frame(temp=70), interval="prediction")
+pred.u.sqsq2 <- predict(lm.u.sqsq, data.frame(temp=70), interval="prediction")^4
+
+
+plot(gasbill ~ temp, data=Utilities)
+abline(lm.u, col="hotpink")
+abline(225.7804 + 26.45, -2.9704, lty=2, col="hotpink")
+abline(225.7804 - 26.45, -2.9704, lty=2, col="hotpink")
+curve((b[1] + b[2]*x)^4, add=TRUE, col="skyblue", lwd=2)
+curve((b[1]+0.2258 + b[2]*x)^4, add=TRUE, col="skyblue", lty=2, lwd=2)
+curve((b[1]-0.2258 + b[2]*x)^4, add=TRUE, col="skyblue", lty=2, lwd=2)
+abline(h=pred.u, lty=2, col="hotpink")
+abline(h=pred.u.sqsq, lty=2, col="skyblue")
+abline(v=c(30,70), lty=2)
+abline(h=pred.u2, lty=2, col="hotpink")
+abline(h=pred.u.sqsq2, lty=2, col="skyblue")
+
+plot(lm.u, which=1)
+View(Utilities)
+
+library(car)
+boxCox(lm.u)
+
+
+
+ggplot(Utilities, aes(x=temp, y=gasbill)) + 
+  geom_point() + 
+  geom_smooth(method="lm", formula=y~x, se=T) +
+  stat_function(fun=function(x) (b[1] + b[2]*x)^4) + 
+  geom_segment(aes(x=30,xend=30, y=pred.u[2], yend=pred.u[3]), alpha=0.01, lwd=3, col="hotpink") + 
+  geom_segment(aes(x=30,xend=30, y=pred.u.sqsq[2], yend=pred.u.sqsq[3]), alpha=0.01, lwd=2, col="skyblue") + 
+  geom_segment(aes(x=70,xend=70, y=pred.u2[2], yend=pred.u2[3]), alpha=0.01, lwd=3, col="hotpink") + 
+  geom_segment(aes(x=70,xend=70, y=pred.u.sqsq2[2], yend=pred.u.sqsq2[3]), alpha=0.01, lwd=2, col="skyblue") 
+  
+
+```
+
+
+```{r}
+#Lowess Curves
+# Lowess
+# LOcally WEighted Scatterplot Smoothing
+# Lots of regressions glued together
+# Traces the averages of the data
+
+
+# Get some data for X and Y
+X <- cars$speed
+Y <- cars$dist
+
+# Ensure the data has no missing values in any of the X,Y pairs
+keep <- which(!is.na(X) & !is.na(Y))
+X <- X[keep]
+Y <- Y[keep]
+
+# Decide on the fraction of points to use for the local regressions
+f <- 1/2
+
+# Identify the total sample size and sample size corresponding to f
+n <- length(X) #total sample size
+nn <- floor(n*f) #number of dots corresponding to percentage f
+
+# Create storage for the lowess fitted-values
+lfit <- rep(NA,n)
+
+# Begin the for loop to compute lowess fitted-values
+for (xc in 1:n){ #let each dot be the center dot, one at a time
+  xdists <- X - X[xc]  #compute distance from all X-values to center dot x-value
+  r <- sort(abs(xdists))[nn] #locate the nn"th" largest x-distance from center x-value
+  xdists.nbrhd <- which(abs(xdists) < r) #identify x-values within the neighborhood
+  w <- rep(0, length(xdists)) #initialize the weights for all x-values at 0
+  w[xdists.nbrhd] <- (1 - abs(xdists[xdists.nbrhd]/r)^3)^3 #tri-cubic weight function 
+  plot(Y ~ X, pch=21, bg=rgb(.53,.81,.92, w), #color dots by their weights
+       col=rgb(.2,.2,.2,.3), cex=1.5, yaxt='n', xaxt='n', xlab="", ylab="")
+  points(Y[xc] ~ X[xc], pch=16, col="orange") #add center dot to plot
+  lmc <- lm(Y ~ X, weights=w) #run weighted regression
+  curve(lmc$coef[1] + lmc$coef[2]*x, #draw line on neighborhood using from and to
+        from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="orange", add=TRUE)
+  lines(lfit[1:xc] ~ X[1:xc], col="gray") #add lowess line up to current center dot
+  
+  #lines(lowess(X,Y), col=rgb(0.698,0.133,0.133,.2))
+  cat("\n\n")
+  readline(prompt=paste0("Center point is point #", xc, "... Press [enter] to continue..."))
+  
+  
+  MADnotThereYet <- TRUE
+  count <- 0
+  while(MADnotThereYet){ #while loop will continue until "MadnotThereYet" becomes false
+    
+    readline(prompt=paste0("\n   Adjusting line to account for outliers in the y-direction... Press [enter] to continue..."))   
+    
+    # overwrite current regression to lighter color if new regression still needed:
+    curve(lmc$coef[1] + lmc$coef[2]*x, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="wheat", add=TRUE)
+    
+    # update the weights
+    MAD <- median(abs(lmc$res))
+    resm <- lmc$res/(6*MAD)
+    resm[resm>1] <- 1
+    bisq <- (1-resm^2)^2
+    w <- w*bisq
+    obs <- coef(lmc)
+    lmc <- lm(Y ~ X, weights=w)
+    
+    curve(lmc$coef[1] + lmc$coef[2]*x, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="orange", add=TRUE)
+    
+    #stopping criterion for the weighted regressions in y-direction
+    count <- count + 1
+    if ( (sum(abs(obs-lmc$coef))<.1) | (count > 3))
+      MADnotThereYet <- FALSE
+    
+  }
+  
+  curve(lmc$coef[1] + lmc$coef[2]*x, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="green", add=TRUE)
+  points(lmc$coef[1] + lmc$coef[2]*X[xc] ~ X[xc], pch=16, col="green")
+  
+  
+  readline(prompt=paste0("\n   Use final line to get fitted value for this point... Press [enter] to continue to next point..."))
+  
+  lfit[xc] <- predict(lmc, data.frame(X=X[xc]))
+  lines(lfit[1:xc] ~ X[1:xc], col="gray")
+  
+  
+  if (xc == n){
+    readline(prompt=paste0("\n  Press [enter] to see actual Lowess curve..."))
+    lines(lowess(X,Y, f=f), col="firebrick")
+    legend("topleft", bty="n", legend="Actual lowess Curve using lowess(...)", col="firebrick", lty=1)
+  }
+  
+  
+}
+
+
+```
+
+```{r}
+#LowessCurves with poly
+# We want local. bias toward the dots closer to us.
+# What if we use the residuals to predict weights. Lowess glues those regression lines together as a set of weighted values
+# There is no way to write the lowess curve. It isn't interpretable. 
+# What Loess does is
+
+
+# Get some data for X and Y
+X <- cars$speed
+Y <- cars$dist
+
+# Ensure the data has no missing values in any of the X,Y pairs
+keep <- which(!is.na(X) & !is.na(Y))
+X <- X[keep]
+Y <- Y[keep]
+
+# Decide on the fraction of points to use for the local regressions
+#I'm trusting the half of the dots on the right. It becomes less smoothe if the f value is low.
+# If you want to know the defaults ?lowess
+# loess is local weighted polynomial if degree is 3 it'd be cubic
+f <- 1/2
+
+# Identify the total sample size and sample size corresponding to f
+n <- length(X) #total sample size
+nn <- floor(n*f) #number of dots corresponding to percentage f (floor because it could be a decimal)
+
+# Create storage for the lowess fitted-values
+lfit <- rep(NA,n)
+
+# Begin the for loop to compute lowess fitted-values
+# instead of i used xc for x current, it's the index for whatever point we're looking at
+for (xc in 1:n){ #let each dot be the center dot, one at a time
+  xdists <- X - X[xc]  #compute distance from all X-values to center dot x-value
+  r <- sort(abs(xdists))[nn] #locate the nn"th" largest x-distance from center x-value
+  xdists.nbrhd <- which(abs(xdists) < r) #identify x-values within the neighborhood
+  w <- rep(0, length(xdists)) #initialize the weights for all x-values at 0
+  w[xdists.nbrhd] <- (1 - abs(xdists[xdists.nbrhd]/r)^3)^3 #tri-cubic weight function 
+  plot(Y ~ X, pch=21, bg=rgb(.53,.81,.92, w), #color dots by their weights
+       col=rgb(.2,.2,.2,.3), cex=1.5, yaxt='n', xaxt='n', xlab="", ylab="")
+  points(Y[xc] ~ X[xc], pch=16, col="orange") #add center dot to plot
+  lmc <- lm(Y ~ X + I(X^2), weights=w) #run weighted regression
+  curve(lmc$coef[1] + lmc$coef[2]*x + lmc$coef[3]*x^2, #draw line on neighborhood using from and to
+        from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="orange", add=TRUE)
+  lines(lfit[1:xc] ~ X[1:xc], col="gray") #add lowess line up to current center dot
+  
+  #lines(lowess(X,Y), col=rgb(0.698,0.133,0.133,.2))
+  cat("\n\n")
+  readline(prompt=paste0("Center point is point #", xc, "... Press [enter] to continue..."))
+  
+  
+  # MAD similar to standard deviation but not biased by outliers also uses bisquare weights instead of tricubic
+  MADnotThereYet <- TRUE
+  count <- 0
+  while(MADnotThereYet){ #while loop will continue until "MadnotThereYet" becomes false
+    
+    readline(prompt=paste0("\n   Adjusting line to account for outliers in the y-direction... Press [enter] to continue..."))   
+    
+    # overwrite current regression to lighter color if new regression still needed:
+    curve(lmc$coef[1] + lmc$coef[2]*x + lmc$coef[3]*x^2, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="wheat", add=TRUE)
+    
+    # update the weights
+    MAD <- median(abs(lmc$res))
+    resm <- lmc$res/(6*MAD)
+    resm[resm>1] <- 1
+    bisq <- (1-resm^2)^2
+    w <- w*bisq
+    obs <- coef(lmc)
+    lmc <- lm(Y ~ X + I(X^2), weights=w)
+    
+    curve(lmc$coef[1] + lmc$coef[2]*x + lmc$coef[3]*x^2, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="orange", add=TRUE)
+    
+    #stopping criterion for the weighted regressions in y-direction
+    count <- count + 1
+    if ( (sum(abs(obs-lmc$coef))<.1) | (count > 3))
+      MADnotThereYet <- FALSE
+    
+  }
+  
+  curve(lmc$coef[1] + lmc$coef[2]*x + lmc$coef[3]*x^2, from=min(X[xdists.nbrhd]), to=max(X[xdists.nbrhd]), col="green", add=TRUE)
+  points(lmc$coef[1] + lmc$coef[2]*X[xc] + lmc$coef[3]*X[xc]^2 ~ X[xc], pch=16, col="green")
+  
+  
+  readline(prompt=paste0("\n   Use final line to get fitted value for this point... Press [enter] to continue to next point..."))
+  
+  lfit[xc] <- predict(lmc, data.frame(X=X[xc]))
+  lines(lfit[1:xc] ~ X[1:xc], col="gray")
+  
+  
+  if (xc == n){
+    readline(prompt=paste0("\n  Press [enter] to see actual Lowess curve..."))
+    lines(lowess(X,Y, f=f), col="firebrick")
+    legend("topleft", bty="n", legend="Actual lowess Curve using lowess(...)", col="firebrick", lty=1)
+  }
+  
+  
+}
+```
+
+
+```{r}
+# recover true model
+```{r, message=FALSE, warning=FALSE}
+p1Data <- read.csv("p1Data-1.csv", header=TRUE)
+p2Data <- read.csv("p2Data-1.csv", header=TRUE)
+p3Data <- read.csv("p3Data-1.csv", header=TRUE)
+```
+
+## Part 1 - Recovering a True Model (Beginner Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+# View(p1Data)
+pairs(p1Data, panel=panel.smooth)
+
+# look for slope
+pairs(p1Data, panel=panel.smooth, col=as.factor(p1Data$X2))
+
+lm1 <- lm(Y ~ X2*X4, data=p1Data)
+summary(lm1)
+# For this one X4 and X2:X4 are significant R2 is .9
+
+lm2 <- lm(Y ~ X1*X2*X3*X4, data = p1Data)
+summary(lm2)
+# nothing is significant
+
+# if we do lm.dot we get X2:X4 significant
+
+# Remember that in a two-lines model the quantitative variable is X1i and the dummy variable turns it on and off is B2. In this the intercept is B0, X4 is B1, X2 is B2, and X2:X4 is B3. If they have same intercept we can remove B2.
+lm3 <- lm(Y ~ X4 + X2:X4, data=p1Data)
+summary(lm3)
+# lm3's aR2 is .9106
+
+# plot B1 with B2 as grouping variable
+plot(Y ~ X4, data=p1Data, col=as.factor(p1Data$X2))
+b <- coef(lm3)
+
+# doesn't work because there needs to be an x, so since x4 is acting as x change x4 to x
+#curve(b[1] + b[2*x4 + b[3]*x4*x2, add=TRUE])
+x2=0
+curve(b[1] + b[2]*x + b[3]*x*x2, add=TRUE)
+x2=1
+curve(b[1] + b[2]*x + b[3]*x*x2, add=TRUE, col="red")
+
+# or leave it as x4, but tell curve the xname
+x2=0
+curve(b[1] + b[2]*x4 + b[3]*x4*x2, add=TRUE, xname="x4")
+x2=1
+curve(b[1] + b[2]*x4 + b[3]*x4*x2, add=TRUE, xname="x4", col="red")
+```
+
+
+## Part 2 - Recovering a True Model (Intermediate Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+
+
+## Part 3 - Recovering a True Model (Advanced Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+#### recover trumodel 2
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+rbdata_beg <- read.csv("rbdata_beginner-1.csv", header=TRUE, stringsAsFactors = TRUE)
+rbdata_int <- read.csv("rbdata_intermediate.csv", header=TRUE, stringsAsFactors = TRUE)
+rbdata_adv <- read.csv("rbdata_advanced.csv", header=TRUE, stringsAsFactors = TRUE)
+```
+
+## Part 1 - Recovering a True Model (Beginner Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{\beta_0 + \beta_1 X_{5i} + \beta_2 X_{3i} + \beta_3 X_{5i} X_{3i}}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = 92.33744 + 6.10211 X_{5i} - 8.57192 X_{3i} + 0.99339 X_{5i} X_{3i}
+$$
+
+with our estimate of $\sigma$ as 1.979 (the residual standard error)
+
+```{r}
+pairs(rbdata_beg, panel=panel.smooth)
+
+lm1 <- lm(Y ~ X3*X5, data=rbdata_beg)
+summary(lm1)
+# notice x5 is the quantitative x axis, so it goes with B1, the slope
+# the x3 variable is the on off switch, so it's B2--it allows the intercept to change
+# x3:x5 allows the slope to change
+
+confint(lm1)
+```
+
+
+## Part 2 - Recovering a True Model (Intermediate Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+
+
+## Part 3 - Recovering a True Model (Advanced Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{\beta_0 + \beta_1 x2 + \beta_2 x2^2 + \\
+            \beta_3 x4 + \beta_4 x4 x2 + \\ 
+            \beta_5 x5 + \beta_6 x5 x2 + \\
+            \beta_7 x8 + \beta_8 x8 x2 + \beta_9 x8 x2^2 + \beta_{10} x8 x2^3 +  \beta_{11} x8 x2^4 + \\ 
+            \beta_{12} x4 x8 + \beta_{13} x4 x8 x2 + \beta_{14} x4 x8 x2^2 + \beta_{15} x4 x8 x2^3 + \beta_{16} x4 x8 x2^4}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r, fig.width=10, fig.height=10}
+pairs(rbdata_adv, panel=panel.smooth)
+# the interaction of x4 and x5 is interesting because it has slope and no dot in the upper right hand corner. It looks purposeful.
+# same with x5 and x8--something is going on. Let's explore.
+
+# let's explore those
+pairs(rbdata_adv, panel=panel.smooth, col=as.factor(rbdata_adv$x4))
+pairs(rbdata_adv, panel=panel.smooth, col=as.factor(rbdata_adv$x5))
+pairs(rbdata_adv, panel=panel.smooth, col=as.factor(rbdata_adv$x8))
+```
+
+```{r}
+# this let's us zoom in on a plot that looks interesting
+plot(y ~ x2, data=rbdata_adv, col=as.factor(x5))
+
+# use ggplot to split things apart using facet wrap 
+# here we can see that something happens when x5 is on
+ggplot(rbdata_adv, aes(x=x2, y=y, color=as.factor(x5))) + 
+  geom_point() + 
+  facet_wrap(~x5)
+
+lm1 <- lm(y ~ x2*x5, data=rbdata_adv)
+summary(lm1)
+
+# update to remove the other intercept 
+lm1 <- lm(y ~ x2 + x2:x5, data=rbdata_adv)
+
+```
+
+```{r, fig.height=10, fig.width=10}
+# remember residual is the distance from yhat to dot--the part that is still unexplained
+# eg I don't know why we sell so much of this each month
+# we now know the residuals and fitted values for these
+# he adds names so we can tell what is what and then adds them as columns into a new data frame
+pairs(cbind(Res=lm1$res,Fit=lm1$fit,rbdata_adv), panel=panel.smooth, col=as.factor(rbdata_adv$x5))
+# here we can see on x2 that where x2 is zero so is x5--they share an intercept
+# the fit is yhat, so the fit can be placed on the square directly below it
+# the fact that the coloring is the same as x5s on off tells us that the two work together to create this model
+```
+
+
+```{r}
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5,x8))) + 
+  geom_point() + 
+  facet_wrap(~interaction(x4,x5,x8))
+
+# go a bit further-from above we know x2 and x5 matter, so we add some of the others
+lm2 <- lm(y ~ x2*x5*x4*x8*I(x2^3), data=rbdata_adv)
+summary(lm2)
+
+# using times shows every interaction but only allows lines, so we introduce quadratics
+# checked the model for significance
+# then added quartics and checked for significance.
+# We saw in the facet that when everything was off we had a quartic
+# go plot by plot looking at what it looks like to decide the shape
+lm3 <- lm(y ~ x2 + I(x2^2) + 
+            x4 + x4:x2 + 
+            x5 + x5:x2 + 
+            x8 + x8:x2 + x8:I(x2^2) + x8:I(x2^3) + x8:I(x2^4) + # it looks like a quartic we put in all the terms of a quartic
+            x4:x8 + x4:x8:x2 + x4:x8:I(x2^2) + x4:x8:I(x2^3) + x4:x8:I(x2^4), 
+          data=rbdata_adv)
+summary(lm3)
+
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5,x8))) + 
+  geom_point(pch=1) + 
+  geom_point(aes(y=lm3$fit), pch=16, cex=0.5) +
+  facet_wrap(~interaction(x4,x5,x8))
+
+# kick things out step by step
+lm4 <- lm(y ~ I(x2^2) + 
+            x4:x2 + x4:I(x2^2) + 
+            x5:x2 + x5:I(x2^2) + 
+            x8 + x8:I(x2^2) + x8:I(x2^4) + 
+            x4:x8 + x4:x8:x2 + x4:x8:I(x2^2) + x4:x8:I(x2^4), 
+          data=rbdata_adv)
+summary(lm4)
+
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5,x8))) + 
+  geom_point(pch=1) + 
+  geom_point(aes(y=lm3$fit), pch=16, cex=0.5) + #this helps you add lines to the plots
+  facet_wrap(~interaction(x4,x5,x8))
+```
+
+```{r, fig.height=10, fig.width=10}
+pairs(cbind(Res=lm3$res,Fit=lm3$fit,rbdata_adv), panel=panel.smooth, col=interaction(rbdata_adv$x4, rbdata_adv$x5, rbdata_adv$x8))
+
+
+
+```
+
+
+```{r}
+#### title logistic
+
+
+
+```{r }
+library(mosaic)
+library(tidyverse)
+View(Utilities)
+
+plot(gasbill ~ month, data=Utilities)
+lm.quad <- lm(gasbill ~ month + I(month^2), data=Utilities)
+b <- coef(lm.quad)
+curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE)
+
+plot(gasbill > 80 ~ month, data=Utilities, col=rgb(.1,.1,.1,.05), pch=16, cex=2)
+
+ggplot(Utilities, aes(x=month, y=as.numeric(gasbill>80))) +
+  geom_point(alpho=0.05, size=5)
+
+
+glm.quad <- glm(gasbill>80 ~ month + I(month^2), data=Utilities, family=binomial)
+b <- coef(glm.quad)
+curve(exp(b[1] + b[2]*x + b[3]*x^2)/(1+exp(b[1] + b[2]*x + b[3]*x^2)))
+
+plot(mpg ~ qsec, data=mtcars, col=as.factor(am))
+lm.21 <- lm(mpg ~ qsec +am +qsec:am, data=mtcars)
+b <- coef(lm.21)
+
+plot(mpg ~ qsec, data=mtcars, col=as.factor(am))
+glm.21 <- glm(mpg ~ qsec +am +qsec:am, data=mtcars)
+b <- coef(lm.21)
+
+
+# know your sample size
+# powerful to have the exponential
+exp(b)
+# odds are equal to e^B0*e^Bx*e^B2x2*eB3xx2
+# for intercept/slopes make sure you're looking at whetherits etothe plus 1 or e to the -2
+
+# remember that 
+plot(mpg>20 ~ qsec, data=mtcars, col=as.factor(am))
+
+
+```
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+#### types of logistic models
+```{r}
+library(mosaic)
+library(tidyverse)
+
+View(Utilities)
+
+plot(gasbill ~ month, data=Utilities)
+lm.quad <- lm(gasbill ~ month + I(month^2), data=Utilities)
+b <- coef(lm.quad)
+curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE)
+
+
+plot(gasbill>80 ~ month, data=Utilities, col=rgb(.1,.1,.1, .05), 
+     pch=16, cex=2)
+glm.quad <- glm(gasbill>80 ~ month + I(month^2), data=Utilities, 
+                family=binomial)
+b <- coef(glm.quad)
+curve(exp(b[1] + b[2]*x + b[3]*x^2)/(1 + exp(b[1] + b[2]*x + b[3]*x^2)), 
+      add=TRUE)
+
+
+
+ggplot(Utilities, aes(x=month, y=as.numeric(gasbill>80))) + 
+  geom_point(alpha=0.05, size=5)
+
+
+
+
+plot(mpg ~ qsec, data=mtcars, col=as.factor(am))
+lm.2l <- lm(mpg ~ qsec + am + qsec:am, data=mtcars)
+b <- coef(lm.2l)
+
+x2=0
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE)
+
+x2=1
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE, col="red")
+
+
+plot(mpg>20 ~ qsec, data=mtcars, col=as.factor(am))
+glm.2l <- glm(mpg>20 ~ qsec + am + qsec:am, data=mtcars, family=binomial)
+b <- coef(glm.2l)
+
+x2=0
+curve(exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)/
+        (1+exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)), add=TRUE)
+
+x2=1
+curve(exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)/
+        (1+exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)), add=TRUE, col="red",
+      n=1000)
+
+exp(b)
+```
+
+
+
+#### housing prices rmd
+library(tidyverse)
+train <- read.csv("train.csv", heade=TRUE, stringsAsFactors=TRUE)
+
+train2 <- train %>%
+  mutate(Alley = as.character(Alley),
+         Alley = ifelse(is.na(Alley), "No Alley", Alley),
+         Alley = factor(Alley, levels=c("No Alley", "Grvl", "Pave"), ordered=TRUE)) %>%
+  mutate(Fence = as.character(Fence),
+         Fence = ifelse(is.na(Fence), "No Fence", Fence),
+         Fence = as.factor(Fence))
+
+
+```
+
+
+```{r}
+lm.1stflr <- lm(SalePrice ~ X1stFlrSF, data=train)
+summary(lm.1stflr)
+
+lm.alley <- lm(SalePrice ~ Alley, data=train)
+summary(lm.alley)
+
+lm.alley2 <- lm(SalePrice ~ Alley, data=train2)
+summary(lm.alley2)
+plot(SalePrice ~ Alley, data=train2)
+
+lm.fence <- lm(SalePrice ~ Fence, data=train)
+summary(lm.fence)
+```
+
+
+```{r}
+lm.1stflr <- lm(SalePrice ~ X1stFlrSF, data=train)
+summary(lm.1stflr)
+
+lm.2ndflr <- lm(SalePrice ~ X2ndFlrSF, data=train)
+summary(lm.2ndflr)
+
+lm.basement <- lm(SalePrice ~ TotalBsmtSF, data=train)
+summary(lm.basement)
+
+#Put them all together into a high dimensional multiple regression model
+
+lm.sqft.all <- lm(SalePrice ~ X1stFlrSF + X2ndFlrSF + TotalBsmtSF, data=train)
+summary(lm.sqft.all)
+
+#Or use mutate and create a new "TotalSF" variable that allows for a simple linear regression model that is just as powerful, but far easier to graph and interpret.
+
+train <- train %>%
+  mutate(TotalSF = X1stFlrSF + X2ndFlrSF + TotalBsmtSF)
+
+lm.sqft <- lm(SalePrice ~ TotalSF, data=train)
+summary(lm.sqft)
+
+ 
+
+#Notice as well how mutate can be used to change complicated variables into simple on-off switches.
+
+plot(SalePrice ~ Neighborhood, data=train, las=2, cex.axis=0.5)
+
+train <- train %>%
+  mutate(TotalSF = X1stFlrSF + X2ndFlrSF + TotalBsmtSF,
+                RichNbrhd = case_when(Neighborhood %in% c("StoneBr", "NridgHt", "NoRidge") ~ 1,                                               TRUE ~ 0))
+
+lm.sqft.rich <- lm(SalePrice ~ TotalSF + RichNbrhd + TotalSF:RichNbrhd, data=train)
+summary(lm.sqft.rich)
+
+plot(SalePrice ~ TotalSF, data=train, col=as.factor(RichNbrhd))
+
+b <- coef(lm.sqft.rich)
+b
+
+drawit <- function(RichNbrhd, i) {
+  curve(b[1] + b[2]*TotalSF + b[3]*RichNbrhd + b[4]*TotalSF*RichNbrhd, add=TRUE, xname="TotalSF", col=palette()[i])
+}
+
+drawit(RichNbrhd = 0, 1)
+drawit(RichNbrhd = 1, 2)
+
+legend("topleft", legend=c("Regular Nbrhd", "Rich Nbrhd"), lty=1, col=palette()[1:2], cex=0.8)
+```
+
+
+```{r}
+lm.sqft <- lm(SalePrice ~ TotalSF, data=train)
+summary(lm.sqft)
+plot(lm.sqft, which=1)
+
+library(car)
+boxCox(lm.sqft)
+
+lm.sqft.log <- lm(log(SalePrice) ~ TotalSF, data=train)
+summary(lm.sqft.log)
+plot(lm.sqft.log, which=1)
+
+
+plot(lm.sqft$residuals ~ ., data=train)
+
+#OverallQual
+#Neighborhood
+
+lm3d <- lm(SalePrice ~ TotalSF + OverallQual + TotalSF:OverallQual, data=train)
+summary(lm3d)
+
+plot(SalePrice ~ OverallQual, data=train)
+plot(SalePrice ~ TotalSF, data=train)
+
+
+```
+
+```{r}
+library(reshape2)
+library(plotly)
+#Perform the multiple regression
+lm3d <- lm(SalePrice ~ TotalSF + I(TotalSF^2) + OverallQual + TotalSF:OverallQual, data=train)
+
+
+#Setup Axis
+axis_x <- seq(min(train$TotalSF), max(train$TotalSF), by = 100)
+axis_y <- seq(min(train$OverallQual), max(train$OverallQual), by = 1)
+
+#Sample points
+air_surface <- expand.grid(TotalSF = axis_x, OverallQual = axis_y, KEEP.OUT.ATTRS=F)
+air_surface <- air_surface %>% mutate(Z=predict.lm(lm3d, newdata = air_surface))
+air_surface <- acast(air_surface, OverallQual ~ TotalSF, value.var = "Z") #y ~ x
+
+#Create scatterplot
+plot_ly(train, 
+        x = ~TotalSF, 
+        y = ~OverallQual, 
+        z = ~SalePrice,
+        text = rownames(train), 
+        type = "scatter3d", 
+        mode = "markers") %>%
+  add_trace(z = air_surface,
+            x = axis_x,
+            y = axis_y,
+            type = "surface")
+```
+
+
+
+```{r}
+plot(SalePrice ~ TotalSF, data=train, col=as.factor(OverallQual))
+
+b <- coef(lm3d)
+
+drawit <- function(OverallQual=1, YearBuilt=1980, i=1){
+  curve(b[1] + b[2]*TotalSF + b[3]*TotalSF^2 + b[4]*OverallQual + b[5]*TotalSF*OverallQual, add=TRUE, xname="TotalSF", col=palette()[i])
+}
+
+drawit(1, 1)
+drawit(2, 2)
+drawit(3, 3)
+drawit(4, 4)
+drawit(5, 5)
+drawit(6, 6)
+drawit(7, 7)
+drawit(8, 8)
+drawit(9, 1)
+drawit(10, 2)
+
+ggplot(train, aes(x=TotalSF, y=SalePrice, color=as.factor(OverallQual))) + 
+  geom_point() + 
+  facet_wrap(~as.factor(OverallQual))
+
+
+train <- train %>%
+  mutate(TotalSF2 = ifelse(TotalSF > 7000, 2500, TotalSF))
+
+
+```
+
+#### 3-17
+```{r}
+library(mosaic)
+library(tidyverse)
+
+View(Utilities)
+
+plot(gasbill ~ month, data=Utilities)
+lm.quad <- lm(gasbill ~ month + I(month^2), data=Utilities)
+b <- coef(lm.quad)
+curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE)
+
+
+plot(gasbill>80 ~ month, data=Utilities, col=rgb(.1,.1,.1, .05), 
+     pch=16, cex=2)
+glm.quad <- glm(gasbill>80 ~ month + I(month^2), data=Utilities, 
+                family=binomial)
+b <- coef(glm.quad)
+curve(exp(b[1] + b[2]*x + b[3]*x^2)/(1 + exp(b[1] + b[2]*x + b[3]*x^2)), 
+      add=TRUE)
+
+
+
+ggplot(Utilities, aes(x=month, y=as.numeric(gasbill>80))) + 
+  geom_point(alpha=0.05, size=5)
+
+
+
+
+plot(mpg ~ qsec, data=mtcars, col=as.factor(am))
+lm.2l <- lm(mpg ~ qsec + am + qsec:am, data=mtcars)
+b <- coef(lm.2l)
+
+x2=0
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE)
+
+x2=1
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE, col="red")
+
+
+plot(mpg>20 ~ qsec, data=mtcars, col=as.factor(am))
+glm.2l <- glm(mpg>20 ~ qsec + am + qsec:am, data=mtcars, family=binomial)
+b <- coef(glm.2l)
+
+x2=0
+curve(exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)/
+        (1+exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)), add=TRUE)
+
+x2=1
+curve(exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)/
+        (1+exp(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2)), add=TRUE, col="red",
+      n=1000)
+
+exp(b)
+```
+
+```{r}
+library(tidyverse)
+m425 <- read.csv("C:/Users/ghsaund/Downloads/Math425PastGrades-1.csv", stringsAsFactors=TRUE)
+
+
+m425 <- m425 %>%
+  mutate(fo70 = ifelse(Final.Exam > 70, 1, 0))
+
+
+
+pairs(m425, panel=panel.smooth)
+
+
+glm1 <- glm(fo70 ~ Math.425.Midterm, data=m425, family=binomial)
+summary(glm1) #AIC 55.211
+
+glm2 <- glm(fo70 ~ Assessment.Quizzes.Final.Score, data=m425, family=binomial)
+summary(glm2) #AIC: 59.266
+
+glm3 <- glm(fo70 ~ Math.425.Midterm + MagicTwoGroups, data=m425, family=binomial)
+summary(glm3) #AIC 20.329
+
+glm4 <- glm(fo70 ~ Math.425.Midterm + I(Math.425.Midterm^2) + MagicTwoGroups, data=m425, family=binomial)
+summary(glm4) #AIC 22.325
+
+glm5 <- glm(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, family=binomial)
+summary(glm5) #AIC 18.329
+
+plot(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+plot(fo70 ~ Math.425.Midterm, data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+
+
+plot(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+b <- coef(glm5)
+curve(exp(b[1] + b[2]*x)/(1 + exp(b[1] + b[2]*x)), add=TRUE)
+
+
+
+## Ignore p-values and focus on good questions to build a model.
+## (Welcome to psychology, socialogy, and economics)
+
+m425 <- m425 %>%
+  mutate(Theory = Theory.Assignment...Residuals..Sums.of.Squares..and.R.Squared + 
+           Theory.Assignment...Sampling.Distributions.Unveiled,
+         AveAssign = (Analysis...Predicting.the.Weather + Analysis...Car.Selling.Price)/2
+         )
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+# interpretation
+exp(coef(glm.q))
+#  Midterm, which is significant, gives 1.19756. This tells us that a 
+#  1 percentage point change in midterm score, increases the odds of
+#  a student getting above 70 on the final by 19.8% (when all other 
+#  variables are held constant). The Midterm consisted
+#  of 25 multiple choice questions. Getting a single question right, results
+#  in a 4 percentage point increase in the midterm score. So, the effect of
+#  each extra correctly answered question, is 
+#  exp(coef(glm.q)[2]*4) = 2.056785 
+#  that students become twice as likely to score above a 70 on the final.
+
+#  Theory assignments are not a significant predictor of the odds of
+#  scoring above a 70 on the final. So any interpretation of this variable
+#  is a gamble as to whether or not it would actually help.
+#  A 1 point increase (out of the 30 possible) on the Theory Assignments
+#  multiplies the odds of scoring above a 70 on the final by 1.066993. Or,
+#  a student is 6.7% more likely to score above a 70 on the final for each
+#  extra point (out of 30 possible) that they score on the Theory Assignments.
+
+library(ResourceSelection)
+hoslem.test(glm.q$y, glm.q$fit)
+
+
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + I(Math.425.Midterm^2) + Math.425.Midterm:AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+## Easy to interpret from this model would be
+## Theory, AveAssign, and Skills.Quizzes.Current.Score
+
+## AttendedAlmostAlwaysY
+## This variable changes the impact of Midterm Score.
+## The midterm score effects the odds by a factor of exp(1.221144) when 
+## attended almost always is "N", but midterm score effects the odds by a
+## factor of exp((1.221144+0.213058)*midterm) when attendance is "Y".
+## However, that impact of midterm is multiplied by exp(-0.007944*midterm^2)
+## in either case. So the larger the midterm score gets, the less impactful
+## it will be on the odds. 
+
+
+
+
+
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + Math.425.Midterm:AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+## Not signficant, so these interpretations are a gamble.
+## If a student misses several classes, then each addition 1 percentage point
+## earned on the midterm decreases the odds of getting over a 70 on the final
+## by (1-exp(-0.08026))*100 = 7.7%. However, if the student attended almost
+## always, then we find that each 1 percentage point increase on the midterm
+## increases the odds of scoring over a 70 on the final by
+## (exp(-0.08026+0.26054) - 1)*100 = 19.8%.
+
+
+
+
+```
+
+
+```{r}
+
+#### validation plotting (logistic?)
+library(tidyverse)
+m425 <- read.csv("C:/Users/ghsaund/Downloads/Math425PastGrades-1.csv", stringsAsFactors=TRUE)
+
+
+m425 <- m425 %>%
+  mutate(fo70 = ifelse(Final.Exam > 70, 1, 0))
+
+
+
+pairs(m425, panel=panel.smooth)
+
+
+glm1 <- glm(fo70 ~ Math.425.Midterm, data=m425, family=binomial)
+summary(glm1) #AIC 55.211
+
+glm2 <- glm(fo70 ~ Assessment.Quizzes.Final.Score, data=m425, family=binomial)
+summary(glm2) #AIC: 59.266
+
+glm3 <- glm(fo70 ~ Math.425.Midterm + MagicTwoGroups, data=m425, family=binomial)
+summary(glm3) #AIC 20.329
+
+glm4 <- glm(fo70 ~ Math.425.Midterm + I(Math.425.Midterm^2) + MagicTwoGroups, data=m425, family=binomial)
+summary(glm4) #AIC 22.325
+
+glm5 <- glm(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, family=binomial)
+summary(glm5) #AIC 18.329
+
+plot(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+plot(fo70 ~ Math.425.Midterm, data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+
+
+plot(fo70 ~ I(Math.425.Midterm*MagicTwoGroups), data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+b <- coef(glm5)
+curve(exp(b[1] + b[2]*x)/(1 + exp(b[1] + b[2]*x)), add=TRUE)
+
+
+
+## Ignore p-values and focus on good questions to build a model.
+## (Welcome to psychology, socialogy, and economics)
+
+m425 <- m425 %>%
+  mutate(Theory = Theory.Assignment...Residuals..Sums.of.Squares..and.R.Squared + 
+           Theory.Assignment...Sampling.Distributions.Unveiled,
+         AveAssign = (Analysis...Predicting.the.Weather + Analysis...Car.Selling.Price)/2
+         )
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+
+plot(fo70 ~ Math.425.Midterm, data=m425, pch=16, col=rgb(.2,.2,.2,.2))
+
+b <- coef(glm.q)
+
+attend=0 #either 0 or 1
+theory=30 #ranges from 6.5 to 30
+anal=15 #ranges from 9 to 15
+skills=100 #ranges from 31.58 to 100
+curve(exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)/
+        (1+exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)), 
+      xname="mid", add=TRUE, col="red")
+
+attend=1 #either 0 or 1
+theory=30 #ranges from 6.5 to 30
+anal=15 #ranges from 9 to 15
+skills=100 #ranges from 31.58 to 100
+curve(exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)/
+        (1+exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)), 
+      xname="mid", add=TRUE, col="green")
+
+attend=1 #either 0 or 1
+theory=27 #ranges from 6.5 to 30
+anal=13.5 #ranges from 9 to 15
+skills=90 #ranges from 31.58 to 100
+curve(exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)/
+        (1+exp(b[1] + b[2]*mid + b[3]*attend + b[4]*theory + b[5]*anal + b[6]*skills)), 
+      xname="mid", add=TRUE, col="orange")
+
+legend("topleft", legend=c("Attend Less, but Perfect Elsewhere", "Attend Almost Always, Perfect Elsewhere","Attended Almost Always, 90% Elsewhere"), lty=1, col=c("red","green","orange"), cex=0.5)
+
+
+# interpretation
+exp(coef(glm.q))
+#  Midterm, which is significant, gives 1.19756. This tells us that a 
+#  1 percentage point change in midterm score, increases the odds of
+#  a student getting above 70 on the final by 19.8% (when all other 
+#  variables are held constant). The Midterm consisted
+#  of 25 multiple choice questions. Getting a single question right, results
+#  in a 4 percentage point increase in the midterm score. So, the effect of
+#  each extra correctly answered question, is 
+#  exp(coef(glm.q)[2]*4) = 2.056785 
+#  that students become twice as likely to score above a 70 on the final.
+
+#  Theory assignments are not a significant predictor of the odds of
+#  scoring above a 70 on the final. So any interpretation of this variable
+#  is a gamble as to whether or not it would actually help.
+#  A 1 point increase (out of the 30 possible) on the Theory Assignments
+#  multiplies the odds of scoring above a 70 on the final by 1.066993. Or,
+#  a student is 6.7% more likely to score above a 70 on the final for each
+#  extra point (out of 30 possible) that they score on the Theory Assignments.
+
+library(ResourceSelection)
+hoslem.test(glm.q$y, glm.q$fit)
+
+
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + I(Math.425.Midterm^2) + Math.425.Midterm:AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+## Easy to interpret from this model would be
+## Theory, AveAssign, and Skills.Quizzes.Current.Score
+
+## AttendedAlmostAlwaysY
+## This variable changes the impact of Midterm Score.
+## The midterm score effects the odds by a factor of exp(1.221144) when 
+## attended almost always is "N", but midterm score effects the odds by a
+## factor of exp((1.221144+0.213058)*midterm) when attendance is "Y".
+## However, that impact of midterm is multiplied by exp(-0.007944*midterm^2)
+## in either case. So the larger the midterm score gets, the less impactful
+## it will be on the odds. 
+
+
+
+
+
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + Math.425.Midterm:AttendedAlmostAlways + Theory + AveAssign + Skills.Quizzes.Current.Score, data=m425, family=binomial)
+summary(glm.q)
+
+## Not signficant, so these interpretations are a gamble.
+## If a student misses several classes, then each addition 1 percentage point
+## earned on the midterm decreases the odds of getting over a 70 on the final
+## by (1-exp(-0.08026))*100 = 7.7%. However, if the student attended almost
+## always, then we find that each 1 percentage point increase on the midterm
+## increases the odds of scoring over a 70 on the final by
+## (exp(-0.08026+0.26054) - 1)*100 = 19.8%.
+
+
+## TO VALIDATE A MODEL
+
+set.seed(121)
+keep <- sample(1:nrow(m425), 40)
+
+mytrain <- m425[keep, ]
+mytest <- m425[-keep, ]
+
+glm.q <- glm(fo70 ~ Math.425.Midterm + 
+               Math.425.Midterm:AttendedAlmostAlways + 
+               Theory + AveAssign + 
+               Skills.Quizzes.Current.Score, data=mytrain, family=binomial)
+
+yourPredictions <- predict(glm.q, mytest, type="response")
+yourPredictions <- ifelse(yourPredictions > 0.5, 1, 0)
+
+table(yourPredictions, mytest$fo70) 
+
+## PCC Percent Correctly Classified
+## Precision, Accuracy, 
+(11+4)/(11+1+1+4)
+#0.88
+
+```
+
+#### random notes
+SSR A good regression should decrease the var
+Sum of Square Regression Error mesured for every x even.
+The only way your line could be worse than ybar is if it moved away from the data so it's not possible because Yhat is the best fit (is in the middle).
+Why does dividing SSR/SSTO give a good? We want $\hat{Y}$ to be far from $\hat{Y}$--we're getting more explanation. If it's close to 0 then it's close to the average, so it's not telling us anything.
+Proportion of variation in Y explained by the regression.
+
+SSE is the unexplained variability
+sum( lmObject$res^2 )
+```{r}
+sum(cars.lm$res^2 )
+```
+<br>
+SSR is the explained variablility
+sum( (lmObject$fit - mean(YourData$Y))^2 )
+```{r}
+cars.ssr <- sum( (cars.lm$fit - mean(cars$dist))^2 )
+```
+<br>
+SSTO
+sum( (YourData$Y - mean(YourData$Y))^2 )
+```{r}
+cars.ssto <- sum( (cars$dist - mean(cars$dist))^2 )
+```
+<br>
+R2 is the ration between explanation and total SSR/SSTO
+```{r}
+cars.ssr/cars.ssto
+```
+<br>
+r (correlation) is square root of $R^2$
+
+```{r}
+sqrt(cars.ssr/cars.ssto)
+```
+
+
+
+# Type 1 error is significant lie
+# A significant result doesn't mean that it's true, it only means it's significant
+
+
+Describe the data
+SS an area measure is a square if we add up residuals we get zero every time 
+sum of square residual
+the line in the middle on the average it's the smallest sum of least squares or the least squares line
+what's difference and a residual and epsilon residual obs - predicted epsilon is the obs - actual 
+residual how far you think I'm from Christ epsilon is how far I am from Christ
+epsilon is theoretical assumption because it's based on a truth we can't see
+no other line can minimize the squares as much as the best fit
+
+We can't get residuals until we get a line, but the line is picked by minimizing the residuals
+Residuals gave you the line as a gift
+
+R2 of 1 gives you nothing because residuals are one, but .99 is good if you get really high R squared we suspect you did sometging wrong like using Y to predict Y
+
+proportion or variation in Y that's used by using the regression (x variable)
+cool graph to make in r
+
+not ri squared r squared  r is the correlation written R^2
+Any time you square a decimal it gets smaller R^2 is stricter on the correlation
+If you signed up for a tutor, a good question would be what was your grade in 425
+
+As the line moves to the middle of the data the SSE decreases 
+SSR is reserved for how far the regression line is from Ybar
+best fit line
+Residuals give us the line and R2
+value of a regression, which is the proportion of variation in Y explained by the regression model. The  SSR/SSTO
+
+The SSE IS the unexplained the amount that we still have in errors (we don't like SSE because it's what we still don't know)
+The SSR is the part explained by the regression line (we like SSR because we understand) Subtract the R2 a barchart could show that.
+R2 is the part of the variability we've come to explain or 1-the part we hcan't explani
+R2 is not the portion of the data that has been explained by regression line the
+It's the variability (departure of the dot from average) that is explained by the data
+
+Why hard to understand R2, we don't know what proportion is or variability what is explained (if we have an R2 of one we've totally explained the data)
+
+Does god ever doanything unexpected He's steady and constant and true. There is no variability in him.
+                                                                                              What variance means is suddenly you're not where you used to be. God doesn't have any SSE
+
+Could we have a small p-value and a vary large R2?
+  pvalue measures the explanation compared to random chance--He's only seen it once a low slow and a million data points. But it's not normal
+R2 isn't necessarily the steepness but how tight the dots are line
+
+p-value measures whether their is a law
+If there is no law then who cares whether the data follows it
+If their is the law
+p-value doesn't mean you found truth but you found something significant.
+R2 how close the data is to the line
+There are laws that exist but people don't follow them
+No one doesn't fall the law of gravity
+
+3rd What else do residuals do. 
+
+First, residuals are the key to obtaining the "least squares estimates" of the regression parameters and. give us the line
+
+Second, residuals are an important part in measuring the value of a regression, which is the proportion of variation in Y explained by the regression model.
+tell us the line
+
+hird, residuals give insight about how much an individual of a given x-value differs from average in their y-value.
+
+Residuals estimate tells us sigma2
+residual standard error is sqt(SSE/n-p)
+MSE = SSE/(n-p) Estimate of signma2 p is parameters
+Residual Standard Error is estimating the sigma of the dots
+Fourth, (and this one you haven't seen yet) residuals can be used to estimate the variance parameter of a regression, i.e.,in the equation
+
+Fifth, (and we will see this one in more detail next week) residuals can be used to determine if a linear regression model is appropriate for a given data set.
+
+We got line from residuals tell how good it is from residuals can estimpate the model praarmeters ilke sigma whether the residuals are appropriate
+
+
+SSE is all the boxes added together
+MSE is the average size of the boxes mean average se the errors 
+
+#### two quadratics
+
+```{r}
+#set the sample size
+n <- 100 
+
+# random uniform gives n random values in a uniform distribution from 15 to 45
+#Gives n random values from a uniform distribution between 0 to 10.
+X_i <- runif(n, -2, 2) 
+X_2i <- sample(c(0,1), n, replace=TRUE) 
+
+# Set   equation
+beta0 <- -2 #Our choice for the y-intercept. 
+beta1 <-  3 #Our choice for the slope. 
+beta2 <-  4
+beta3 <-  4
+beta4 <-  2
+beta5 <- -7
+sigma <- .5 #Our choice for the std. deviation of the error terms.
+#Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
+epsilon_i <- rnorm(n, 0, sigma) 
+    
+#Create Y using the normal error quadratic regression model (don't forget beta3's X_2i)
+Y_i <- beta0 + beta1*X_i + beta2*X_i^2 + beta3*X_2i + beta4*X_i*X_2i + beta5*(X_i^2)*X_2i + epsilon_i 
+    
+#Store the data as data
+fabData <- data.frame(y=Y_i, x1=X_i, x2=X_2i) 
+#View(fabData) 
+
+quad2.lm <- lm(y ~ x1 + I(x1^2) + x2 + x1:x2 + I(x1^2):x2, data=fabData)
+b <- coef(quad2.lm)
+summary(quad2.lm)
+
+  
+ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) + 
+  geom_point(pch=16) +
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2, lty=1, aes(color="Yhat1")) +
+  stat_function(fun = function(x) (b[1] + b[4]) + (b[2] + b[5])*x + (b[3] + b[6])*(x^2), lty=1, aes(color="Yha2t")) +
+  stat_function(fun = function(x) beta0 + beta1*x + beta2*x^2, lty=2, aes(color="E{Y}1")) +
+  stat_function(fun = function(x) (beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*(x^2), lty=2, aes(color="E{Y}2")) +
+  labs(title="Quadratic Regression Relation Diagram") +
+  scale_colour_manual("Legend", values = c("pink", "skyblue", "pink", "skyblue", "skyblue","pink")) +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  theme_minimal()
+
+# Could pass in the x2 and set it to 0 the first time, 1 the second
+# stat_function(fun = function(x, x2=0) b[1] + b[2]*x + b[3]*x^2 + b[4]*x2 + b[5]*x*x2 + b[6]*x^2*x2, lty=1, aes(color="Yhat1")) +
+  
+```
+
+
+
+```{r}
+#set the sample size
+n <- 100 
+
+# random uniform gives n random values in a uniform distribution from 15 to 45
+#Gives n random values from a uniform distribution between 0 to 10.
+X_i <- runif(n, -2, 2) 
+X_2i <- sample(c(0,1), n, replace=TRUE) 
+
+# Set   equation
+beta0 <- -2 #Our choice for the y-intercept. 
+beta1 <-  3 #Our choice for the slope. 
+#beta2 <-  4
+beta2 <-  4
+beta3 <-  2
+beta4 <- -3
+sigma <- .5 #Our choice for the std. deviation of the error terms.
+#Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
+epsilon_i <- rnorm(n, 0, sigma) 
+    
+#Create Y using the normal error quadratic regression model (don't forget beta3's X_2i)
+Y_i <- beta0 + beta1*X_i + beta2*X_2i + beta3*X_i*X_2i + beta4*(X_i^2)*X_2i + epsilon_i 
+    
+#Store the data as data
+fabData <- data.frame(y=Y_i, x1=X_i, x2=X_2i) 
+#View(fabData) 
+
+quad2.lm <- lm(y ~ x1 + x2 + x1:x2 + I(x1^2):x2, data=fabData)
+b <- coef(quad2.lm)
+summary(quad2.lm)
+
+  
+ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) + 
+  geom_point(pch=16) +
+  stat_function(fun = function(x) b[1] + b[2]*x, lty=1, aes(color="Yhat1")) +
+  stat_function(fun = function(x) (b[1] + b[3]) + (b[2] + b[4])*x + (b[5])*(x^2), lty=1, aes(color="Yha2t")) +
+  stat_function(fun = function(x) beta0 + beta1*x, lty=2, aes(color="E{Y}1")) +
+  stat_function(fun = function(x) (beta0 + beta2) + (beta1 + beta3)*x + (beta4)*(x^2), lty=2, aes(color="E{Y}2")) +
+  labs(title="Quadratic Regression Relation Diagram") +
+  scale_colour_manual("Legend", values = c("pink", "skyblue", "pink", "skyblue", "skyblue","pink")) +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  theme_minimal()
+
+# Could pass in the x2 and set it to 0 the first time, 1 the second
+# stat_function(fun = function(x, x2=0) b[1] + b[2]*x + b[3]*x^2 + b[4]*x2 + b[5]*x*x2 + b[6]*x^2*x2, lty=1, aes(color="Yhat1")) +
+  
+```
+
