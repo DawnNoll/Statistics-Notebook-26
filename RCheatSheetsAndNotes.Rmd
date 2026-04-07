@@ -1738,6 +1738,8 @@ ggplot(data=wblake, aes(y=Scale, x=Length)) +
 
 ##### Quizzes: Model Types
 
+See Skills quiz different types of models in this folder
+
 ```{r, eval=FALSE, fig.height=4, fig.width=4}
 
 

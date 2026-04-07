@@ -309,15 +309,16 @@ summary(mt2qs.lm)
 format(6.607e-05) #can un scientific notation just move it positive or negative that number of spots  2.619e+01 is 26.9, -2.926e-03 is -0.002926, if it's e+00 it's just the number
 # CHECK CLOSELY so you don't turn a positive with an e-xx to a negative number--only move the decimal
 
-ggplot(mtcars, aes(y=mpg, x=qsec, color=factor(am))) +
-  geom_point(pch=21, bg="gray") +
-  #geom_smooth(method="lm", se=F) + #easy way, but only draws the full interaction model. The manual way using stat_function (see below) is more involved, but more dynamic.
-  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") + #am==0 line
-  stat_function(fun = function(x) (b[1]+b[3]) + (b[2]+b[4])*x, color="orange") + #am==1 line 
+ggplot(mtcars, aes(x=disp, y=qsec, col=as.factor(am))) +
+  geom_point() +
+  stat_function(fun=function(x) b[1] + b[2]*x + b[3]*x^2, aes(color="0")) +
+  stat_function(fun=function(x) (b[1] + b[4]) + (b[2] + b[5])*x + 
+                  (b[3] + b[6])*x^2, aes(color="1")) +
+  labs(title="The interaction of displacement andh transmisison type on quarter mile time", xlab="Displacement", ylab="Qsec") +
   scale_color_manual(name="Transmission (am)", values=c("skyblue","orange")) +
-  labs(title="Two-lines Model using mtcars data set") 
+  theme_minimal()
 
- Typically, we will drop the "least significant term" or term with the highest p-value first, then see if that changes the p-values of the other terms or not. Usually we will not drop all significant terms all at once. This is sometimes called a "backwards step-wise" model selection procedure.
+ >Typically, we will drop the "least significant term" or term with the highest p-value first, then see if that changes the p-values of the other terms or not. Usually we will not drop all significant terms all at once. This is sometimes called a "backwards step-wise" model selection procedure.
 ```
 
 Type your answer here...
@@ -382,14 +383,226 @@ Type your answer here...
 
 </div>
 
+## Problem 4
+
+
+```{r eval=FALSE}
+# Simulate two quadratics
+# y_i = b_0 + b_1X_i + b_2X_i^2 + b_3X_2 + b_4X_1X_2 + b_5X_i^2
+library(ggplot2)
+## Simulating Data from a Regression Model
+## This R-chunk is meant to be played in your R Console.
+## It allows you to explore how the various elements
+## of the regression model combine together to "create"
+## data and then use the data to "re-create" the line.
+
+#Allows us to always get the same "random" sample
+#Change to a new number to get a new sample
+set.seed(111) 
+
+#set the sample size
+n <- 100 
+
+# random uniform gives n random values in a uniform distribution from 15 to 45
+#Gives n random values from a uniform distribution between 0 to 10.
+X_i <- runif(n, -2, 2) 
+X_2i <- sample(c(0,1), n, replace=TRUE) 
+
+# Set   equation
+beta0 <- -2 #Our choice for the y-intercept. 
+beta1 <-  3 #Our choice for the slope. 
+beta2 <-  4
+beta3 <-  4
+beta4 <-  2
+beta5 <- -7
+sigma <- .5 #Our choice for the std. deviation of the error terms.
+#Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
+epsilon_i <- rnorm(n, 0, sigma) 
+    
+#Create Y using the normal error quadratic regression model (don't forget beta3's X_2i)
+Y_i <- beta0 + beta1*X_i + beta2*X_i^2 + beta3*X_2i + beta4*X_i*X_2i + beta5*(X_i^2)*X_2i + epsilon_i 
+    
+#Store the data as data
+fabData <- data.frame(y=Y_i, x1=X_i, x2=X_2i) 
+#View(fabData) 
+
+quad2.lm <- lm(y ~ x1 + I(x1^2) + x2 + x1:x2 + I(x1^2):x2, data=fabData)
+b <- coef(quad2.lm)
+summary(quad2.lm)
+
+  
+ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) + 
+  geom_point(pch=16) +
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2, lty=1, aes(color="Yhat1")) +
+  stat_function(fun = function(x) (b[1] + b[4]) + (b[2] + b[5])*x + (b[3] + b[6])*(x^2), lty=1, aes(color="Yha2t")) +
+  stat_function(fun = function(x) beta0 + beta1*x + beta2*x^2, lty=2, aes(color="E{Y}1")) +
+  stat_function(fun = function(x) (beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*(x^2), lty=2, aes(color="E{Y}2")) +
+  labs(title="Quadratic Regression Relation Diagram") +
+  scale_colour_manual("Legend", values = c("pink", "skyblue", "pink", "skyblue", "skyblue","pink")) +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  theme_minimal()
+
+# Could pass in the x2 and set it to 0 the first time, 1 the second
+# stat_function(fun = function(x, x2=0) b[1] + b[2]*x + b[3]*x^2 + b[4]*x2 + b[5]*x*x2 + b[6]*x^2*x2, lty=1, aes(color="Yhat1")) +
+  
 
 
 
 
 
 
+```
 
+## Further Exploration
 
+```{r}
+set.seed(101) #Allows us to always get the same "random" sample                
+#Change to a new number to get a new sample  
+
+n <- 100 #30 #set the sample size, 30 was original  
+
+X_i <- runif(n, -5, 55)     #Gives n random values from a uniform distribution between 15 to 45.  
+
+X_2i <- sample(c(0,1,2,4,10), n, replace=TRUE) # round 3
+#sample(c(0,1,2), n, replace=TRUE) #round 2 code
+#sample(c(0,1), n, replace=TRUE)      #Gives n 0's and 1's randomly    this was the original code
+
+ 
+
+beta0 <- 3 #Our choice for the y-intercept.  
+
+beta1 <- 2.5 #Our choice for the slope.    
+
+beta2 <- -20 #Our choice for the change in y-intercept from the first line to the second line.
+
+beta3 <- 3.5 #Our choice for the change in slope from the first line to the second line.     
+
+ 
+
+sigma <- 3 #Our choice for the std. deviation of the error terms.  
+
+epsilon_i <- rnorm(n, 0, sigma)     #Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.  
+
+ 
+
+Y_i <- beta0 + beta1*X_i + beta2*X_2i + beta3*X_i*X_2i + epsilon_i     #Create Y using the Two-Lines regression model  
+
+ 
+
+fabData <- data.frame(y=Y_i, x=X_i, x2=X_2i)     #Store the data as data  
+
+#In the real world, we begin with data (like fabData) and try to recover the model that  
+
+# (we assume) was used to created it.  
+
+ 
+
+fab.lm <- lm(y ~ x + x2 + x:x2, data=fabData) #Fit an estimated two-lines regression model to the fabData.  
+
+summary(fab.lm) #Summarize your model.  
+
+ 
+
+plot(y ~ x, data=fabData, col=as.factor(x2), pch=16) #Plot the data.  
+
+b <- coef(fab.lm)   #Add the estimated regression line to your plot.  
+
+x2 = 0  #draw the x2=0 baseline line
+
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE)  
+
+x2 = 1   #draw the x2=1 line (changed line)
+
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE, col="red")
+
+x2=2
+
+  curve(beta0 + beta1*x + beta2*x2 +beta3*x*x2, add=TRUE, lty=2, col="green")
+  
+x2=4
+
+  curve(beta0 + beta1*x + beta2*x2 +beta3*x*x2, add=TRUE, lty=2, col="cornflowerblue")
+  
+x2=10
+
+  curve(beta0 + beta1*x + beta2*x2 +beta3*x*x2, add=TRUE, lty=2, col="turquoise")
+```
+
+## four line model
+
+```{r}
+set.seed(101) #Allows us to always get the same "random" sample                
+#Change to a new number to get a new sample  
+
+n <- 100 #30 #set the sample size, 30 was original  
+
+X_i <- runif(n, -5, 55)     #Gives n random values from a uniform distribution between 15 to 45.  
+
+X_2i <- sample(c(0,1), n, replace=TRUE) 
+
+X_3i <- sample(c(0,1), n, replace=TRUE) #info said 0 or 1
+
+beta0 <- 3 #Our choice for the y-intercept.  
+
+beta1 <- 2.5 #Our choice for the slope.    
+
+beta2 <- -20 #Our choice for the change in y-intercept from the first line to the second line.
+
+beta3 <- 3.5 #Our choice for the change in slope from the first line to the second line.     
+
+beta4 <- 1.5
+beta5 <- 2
+beta6 <- -1
+
+sigma <- 3 #Our choice for the std. deviation of the error terms.  
+
+epsilon_i <- rnorm(n, 0, sigma)     #Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.  
+
+ 
+
+Y_i <- beta0 + beta1*X_i + beta2*X_2i + beta3*X_i*X_2i + beta4*X_3i + beta5*X_i*X_3i + beta6*X_i*X_2i*X_3i + epsilon_i     #Create Y using the Two-Lines regression model  
+
+ 
+
+fabData <- data.frame(y=Y_i, x=X_i, x2=X_2i)     #Store the data as data  
+
+#In the real world, we begin with data (like fabData) and try to recover the model that  
+
+# (we assume) was used to created it.  
+
+ 
+
+fab.lm <- lm(y ~ x + x2 + x:x2, data=fabData) #Fit an estimated two-lines regression model to the fabData.  
+
+summary(fab.lm) #Summarize your model.  
+
+ 
+
+plot(y ~ x, data=fabData, col=as.factor(x2), pch=16) #Plot the data.  
+
+b <- coef(fab.lm)   #Add the estimated regression line to your plot.  
+
+x2 = 0  #draw the x2=0 baseline line
+X3 = 0 
+
+curve(b[1] + b[2]*x + b[3]*x2 + b[4]*x*x2, add=TRUE)  
+
+x2 = 1   #draw the x2=1 line (changed line)
+X3 = 0 
+
+curve(beta0 + beta1*x + beta2*x2 + beta3*x*x2 + beta4*x3 + beta5*x*x3 + beta6*x*x2*x3, add=TRUE, lty=2, col="red")
+
+x2 = 0   
+X3 = 1
+
+curve(beta0 + beta1*x + beta2*x2 + beta3*x*x2 + beta4*x3 + beta5*x*x3 + beta6*x*x2*x3, add=TRUE, lty=2, col="green")
+  
+x2 = 1   
+X3 = 1
+
+curve(beta0 + beta1*x + beta2*x2 + beta3*x*x2 + beta4*x3 + beta5*x*x3 + beta6*x*x2*x3, add=TRUE, lty=2, col="cornflowerblue")
+
+```
 
 <style>
 
