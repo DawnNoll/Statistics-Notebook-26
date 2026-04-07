@@ -2172,8 +2172,9 @@ ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) +
 The residuals v fitted plot is essentially a lowess curve.
 
 ```{r, eval=FALSE}
-#library(tidyverse)
-#View(Utilities)
+library(tidyverse)
+library(mosaicData)
+View(Utilities)
 
 quad.lm <- lm(gasbill ~ month + I(month^2), data=Utilities)
 summary(quad.lm)
@@ -2187,7 +2188,7 @@ curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE, col="blue")
 ggplot(Utilities, aes(x=month, y=gasbill)) +
   geom_point() +
   geom_smooth() + #lowess is the default
-  stat_function(b[1] + b[2]*x + b[3]*x^2)
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2)
 
 
 X <- c(1, 4,  7,   8,  10, 20)

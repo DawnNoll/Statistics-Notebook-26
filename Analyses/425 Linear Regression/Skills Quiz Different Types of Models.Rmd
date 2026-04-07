@@ -405,7 +405,7 @@ n <- 100
 
 # random uniform gives n random values in a uniform distribution from 15 to 45
 #Gives n random values from a uniform distribution between 0 to 10.
-X_i <- runif(n, -2, 2) 
+X_i <- runif(n, -2, 3) 
 X_2i <- sample(c(0,1), n, replace=TRUE) 
 
 # Set   equation
@@ -434,11 +434,11 @@ summary(quad2.lm)
 ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) + 
   geom_point(pch=16) +
   stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2, lty=1, aes(color="Yhat1")) +
-  stat_function(fun = function(x) (b[1] + b[4]) + (b[2] + b[5])*x + (b[3] + b[6])*(x^2), lty=1, aes(color="Yha2t")) +
-  stat_function(fun = function(x) beta0 + beta1*x + beta2*x^2, lty=2, aes(color="E{Y}1")) +
-  stat_function(fun = function(x) (beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*(x^2), lty=2, aes(color="E{Y}2")) +
-  labs(title="Quadratic Regression Relation Diagram") +
-  scale_colour_manual("Legend", values = c("pink", "skyblue", "pink", "skyblue", "skyblue","pink")) +
+  stat_function(fun = function(x) (b[1] + b[4]) + (b[2] + b[5])*x + (b[3] + b[6])*(x^2), lty=1, aes(color="Yhat2")) +
+  #stat_function(fun = function(x) beta0 + beta1*x + beta2*x^2, lty=2, aes(color="E{Y}1")) +
+  #stat_function(fun = function(x) (beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*(x^2), lty=2, aes(color="E{Y}2")) +
+  coord_cartesian(ylim = c(-12, 12))+
+  scale_colour_manual("Legend", values = c("blue", "red", "blue", "red")) + # , "skyblue","pink"
   theme(legend.position = "bottom", legend.title = element_blank()) +
   theme_minimal()
 
