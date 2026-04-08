@@ -1,0 +1,173 @@
+---
+title: "Recovering a True Model--Model selection"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+```{r, message=FALSE, warning=FALSE}
+library(mosaic)
+View(Births78)
+pairs(Births78, panel=panel.smooth)
+
+#a
+B78 <- Births78 %>%
+  select(births, wday, day_of_year) %>%
+  mutate(weekend = ifelse(wday %in% c("Sat", "Sun"),1,0))
+
+pairs(B78, panel=panel.smooth)
+# separate weekend
+pairs(B78, panel=panel.smooth, col=as.factor(B78$weekend)) # this version has a fairly clean separation between weekends in red and weekdays in black, except for a few days which turn out to be holidays--doctors don't want to do inductions then. 
+
+
+# this plot looks pretty good, looks like a cubic but can experiment inside geom_smooth(span=0.75) to see more details .5 looks like maybe two more turns, .2 is crazy, but you can experiment with it. It's totally arbitrary. It's all up to you. Span is essentially how much of the data we're going to trust. Span's default is .75 or 75%
+ggplot(B78, aes(x=day_of_year, y=births, color=as.factor(weekend))) +
+  geom_point() +
+  geom_smooth(span=0.5)
+
+myquin <- lm(births ~ day_of_year +
+               I(day_of_year^2) +
+               I(day_of_year^3) +
+               I(day_of_year^4) +
+               I(day_of_year^5) + # these first lines only add a quintic, not two 
+               weekend,   # allows to different intercepts, but they're staying parallel so no more
+               data=B78)
+# could choose to add weekend:day_of_year + weekend:I(day_of_year^2)and so on
+summary(myquin)
+b <- coef(myquin)
+             
+# remember real data might not have a true model that you can find, we also don't know that we have the right data to find that model  
+# 
+# First, there is a true linear regression model that generated the data.
+# Second, all important predictor variables needed to recover the true model are present. 
+               
+```
+a)
+wday and day-of-week are the same only wday is in words, pairs converts to numbers
+date and day of year are same,
+Everything similar can be dropped
+
+```{r, message=FALSE, warning=FALSE}
+library(Applr)
+rbdata_beg <- read.csv("rbdata_beginner.csv", header=TRUE, stringsAsFactors = TRUE)
+rbdata_int <- read.csv("rbdata_intermediate.csv", header=TRUE, stringsAsFactors = TRUE)
+rbdata_adv <- read.csv("rbdata_advanced.csv", header=TRUE, stringsAsFactors = TRUE)
+```
+
+## Part 1 - Recovering a True Model (Beginner Level)
+
+```{r}
+View(rbdata_beg)
+pairs(rbdata_beg, panel=panel.smooth, 
+      col=as.factor(rbdata_beg$x3))
+# easy to see because only two have slope, but why did he know
+lm1 <- lm(y ~ x3*x5, data=rbdata_beg)
+summary(lm1)
+lm_equation(lm1)
+lm_latex(lm1) #have to double check because the default labeling is sometimes wrong 
+```
+
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{\beta_0 + \beta_1 X_{5i}+ \beta_2 X_{3i} + \beta_3 X_{5i} X_{3i}}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$\underbrace{\hat{Y_i}}_{\text{Pred. y}} = 92.3 + -8.57\underbrace{X_{1i}}_{\text{x3}} + 6.1\underbrace{X_{2i}}_{\text{x5}} + 0.993\underbrace{X_{3i}}_{\text{x3:x5}}$$
+
+with our estimate of $\sigma$ as 1.979 this number comes from the Residual Standard Error
+
+
+## Part 2 - Recovering a True Model (Intermediate Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+
+
+## Part 3 - Recovering a True Model (Advanced Level)
+
+```{r}
+View(rbdata_adv)
+```
+
+```{r, fig.height=10, fig.width=10}
+pairs(rbdata_adv, panel=panel.smooth) #if you don't see slope where you really need to find it (in y), then look elswhere
+# focus on upper diagonal
+# # x4s and x5s has a diagonal, but what looks like only 3 dots , he's suspicious of x4, x5, x8
+
+pairs(rbdata_adv, panel=panel.smooth, 
+      col=as.factor(rbdata_adv$x4))
+
+ggplot(rbdata_adv, aes(x=x2, y=y, color=x4))+ 
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~x4)
+
+# interaction multiplies and gives the possibles
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5)))+ 
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~x4)
+
+# here we start with x2 the x in the plot (all switches are off), then we go to the next color which is x4 1 switch on
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5,x8)))+ 
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~interaction(x4,x5))
+
+
+ggplot(rbdata_adv, aes(x=x2, y=y, color=interaction(x4,x5,x8)))+ 
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~interaction(x4,x5,x8))
+
+mylm <- lm(y ~ I(x2^2) + 
+             x4:x2 + x4:I(x2^2) + #here the quadratic is elimintating the curve of the first quadratic
+             x5:x2 + x5:I(x2^2) + 
+             x8 + x8:I(x2^2) + x8:I(x2^4) + 
+             x4:x8 + x4:x8:x2 + x4:x8:I(x2^2) + x4:x8:I(x2^4), # because it's a bit of a 4th degree polynomial
+           data=rbdata_adv)
+summary(mylm) # he didn't get rid of the lowest sig first, he got rid of the most complicated that wasn't sig, then he did it again
+
+
+pairs(rbdata_adv, panel=panel.smooth, 
+      col=as.factor(rbdata_adv$x5))
+
+pairs(rbdata_adv, panel=panel.smooth, 
+      col=as.factor(rbdata_adv$x8))
+
+
+```
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$\underbrace{\hat{Y_i}}_{\text{Pred. y}} = -0.92 + 2.22\underbrace{X_{1i}}_{\text{I(x2^2)}} + 2.73\underbrace{X_{2i}}_{\text{x8}} + 1.03\underbrace{X_{3i}}_{\text{x4:x2}} - 2.42\underbrace{X_{4i}}_{\text{I(x2^2):x4}} - 1.86\underbrace{X_{5i}}_{\text{x2:x5}} - 1.21\underbrace{X_{6i}}_{\text{I(x2^2):x5}} - 16\underbrace{X_{7i}}_{\text{I(x2^2):x8}} + 8.92\underbrace{X_{8i}}_{\text{x8:I(x2^4)}} - 4.73\underbrace{X_{9i}}_{\text{x4:x8}} - 0.724\underbrace{X_{10i}}_{\text{x4:x2:x8}} + 30\underbrace{X_{11i}}_{\text{I(x2^2):x4:x8}} - 18\underbrace{X_{12i}}_{\text{x4:x8:I(x2^4)}}$$
+
+with our estimate of $\sigma$ as 1.497
