@@ -1384,6 +1384,9 @@ calculate_t_value <- function(estimate, std_error, number=0){
 calculate_p_value <- function(t_value, dof){
   2*pt(-abs(t_value), dof)
 }
+calculate_p_value(19.55,397)
+calculate_p_value(-6.9795,99)
+-7.453-(-0.947)/2
 
 # compute P-value use percentile function for t-dist pt(tvalue, DofF)
 # gives one-tail, so multiply by 2 for alt hyp with not equal

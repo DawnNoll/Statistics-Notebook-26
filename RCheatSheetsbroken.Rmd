@@ -2366,6 +2366,21 @@ plot(ut3quadnew.lm, which=1)
 
 #Fortunately, our model does give the customer great insight about how their final bill is created, and would allow them an opportunity (if we assume causation) to make changes to their habits that might change their overall bill. So, while not as useful for prediction, it is highly valuable for interpretation and insight.
 
+#### why bind res and fit to data for pairs plot?
+# According to google Combining the residuals and fitted values (often along with predictors) into a pairs plot—or a scatterplot matrix—is helpful because it allows you to explicitly link modeling errors back to specific predictor variables and their ranges. 
+# When the Residuals v Fitted plot shows a poor fit (e.g., non-random, curved patterns or fanning), it tells you the model is broken, but not why. Looking at the pairs plot of (data, residuals, fitted) provides a direct visual link between the error and the input variables, making it easier to diagnose the specific issue. 
+# Here is why this method is valuable:
+# Identifies Hidden Nonlinearity: You can see if a pattern in the residuals (e.g., a "U" shape) matches a nonlinear trend in a specific predictor (
+# ), indicating a missing quadratic term (
+# ).
+# Diagnoses Heteroscedasticity: It helps you identify which predictor corresponds to widening residuals, showing you which variable causes non-constant variance (e.g., variance increases as 
+#  increases).
+# Links Residuals to Data Points: In multiple regression, the fitted values are a combination of predictors. The pairs plot lets you trace a single, high-residual point across all predictors to see if it is a leverage point, outlier, or simply incorrectly modeled.
+# Shows Interaction Effects: You may see that the residuals show a pattern specifically when two predictors, 
+#  and 
+# , are both high, suggesting an interaction term (
+# 
+# ) is needed. 
 
 # left her because has the color interaction code
 pairs(cbind(Res=ut.lm$res,Fit=ut.lm$fit,rbdata_adv), panel=panel.smooth)
