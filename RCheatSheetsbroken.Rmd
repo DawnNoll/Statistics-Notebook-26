@@ -865,6 +865,11 @@ geom_smooth(method="lm", formula=y~x, se=F) +
 
 o.pred <- predict(o.sqrt.lm, data.frame(age=500))
 o.pred^2  # use predict on the transformed model and then reverse the answer
+
+
+### Assessment
+#A regresion is performed and the following plot created. Images a residuals v fitted plot. Which of the following correctly shows the original scatterplot of this regression?
+#resdiual is the obs-fit, so the r=act-fit so fit+residual=actual
 ```
 
 
@@ -1174,7 +1179,41 @@ ggplot(data=Clothing, mapping=aes(y=sqrt(sqrt(tsales)), x=log(hourspw))) +
 boxCox(cl.lm)
 
 # Assessment
+#2Below is the summary output from a simple linear regression performed in R. Compute the 95% confidence interval for the slope estimate.
+Ans: (7.701, 9.423)
 
+Since a 95% confidence interval is obtained by the formula: estimate +/- margin of error, and the margin of error is given by (t*)(std. error) then we have:
+
+qt(1-0.05/2, 397) #gives the critical value for t* = 1.965957
+
+and std. error = 0.4379 #as shown in the summary output
+
+So, 
+
+8.5621 - 1.965957 * 0.4379 #lower bound
+
+8.5621 + 1.965957 * 0.4379 #upper bound
+
+If you used instead
+
+8.5621 +/- 2 * 0.4379 
+
+then you would have still come close to the correct answer, but it would not be as correct as using the actual critical value from the t distribution with 397 degrees of freedom.
+
+#3
+Suppose a 95% confidence interval for the true regression slope is obtained as (-7.453, -0.947) from a sample of 100 x-y points. What is the p-value for the test of the following hypotheses?
+
+H0=-10
+ 0.0006175379
+The margin of error can be found from the confidence interval by using (-7.453 - -0.947)/2 = -3.253. Similarly, the estimate of the slope can be found by finding the middle of the confidence interval (-7.453 + -0.947)/2 = -4.2.
+
+Then, the critical value of the margin of error can be found using qt(1-0.05/2, 100-2) = 1.984467.
+
+This allows us to recover just the standard error of the slope, which is margin of error / critical value = -3.253/1.984467 = -1.639231.
+
+Thus, t = (estimate - hypothesized)/std. error = (-4.2 - -10)/-1.639231 = -3.538244, and the corresponding p-value is clearly very small, but can be computed exactly by pt(-3.538244, 98)*2 which gives p-value = 0.0006175379.
+
+ 
 
 ```
 
