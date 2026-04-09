@@ -576,7 +576,7 @@ plot(mtcyl.lm, which = 1:2)
 plot(mtcyl.lm$residuals)
 
 
-# Assessment: Residuals, Sums of Squares, and R squared
+### Assessment: Residuals, Sums of Squares, and R squared
 # A regression was performed for a sample of n = 5 data points.
 # The y-values of the regression are: 3.78, 6.08, 6.65, 9.25, and 9.92.
 # The residuals from the regression are: -0.266, 0.489, -0.486, 0.569, and -0.306.
@@ -594,7 +594,19 @@ R2 = 1 - SSE/SSTO
 #R2 = 0.9612032
 
 
+#2
+#Open the mtcars data set in R.
+#This data can be used to show that the displacement of the engine (disp) is positively correlated with the weight of the vehicle (wt).
+#What is the R-squared value of this regression?
+mt.lm <- lm(disp ~ wt, data=mtcars) 
+summary(mt.lm)
+
+#3 
+#Open the mtcars data set in R.
+#Perform a regression of mpg on weight of the vehicle (mpg ~ wt).
+#A certain statistics teacher at BYU-Idaho drives a 2001 Nissan Sentra that weighs approximately 2,700 lbs and currently gets only 21 mpg. Based on the regression you performed, how many mpg above or below average is this vehicle?
 mt.lm <- lm(mpg ~ wt, data=mtcars) #perform the regression
+summary(mt.lm)
 plot(mpg ~ wt, data=mtcars) #draw the regression (not needed, but nice)
 abline(mt.lm) #add the regression line (not needed, but nice)
 points(2.7, 21, pch=16, col="skyblue") #add the Nissan Sentra value (not needed, but nice)
@@ -2166,6 +2178,22 @@ ggplot(fabData, aes(y=y, x=x1, color=as.factor(x2))) +
 
 ```
 
+##### Assessementt
+
+```{r, eval=FALSE, fig.height=4, fig.width=4}
+# which has the best linearity (which line is straightest, 
+# not which closest to dotted line )
+a <- lm(height~age + I(age^2), data=Loblolly)
+b <- lm(height~age+ I(age^2) + I(age^3) +I(age^4), data=Loblolly)
+c <- lm(height~age+ I(age^2) + I(age^3) +I(age^4) + I(age^5), data=Loblolly)
+d <- lm(height~age+ I(age^2) + I(age^3), data=Loblolly)
+par(mfrow = c(2, 2))# look at more than one grid
+plot(a, which=1, main="A")
+plot(b, which=1, main="B")
+plot(c, which=1, main="C")
+plot(d, which=1, main="D")
+
+```
 
 #### 7. Lowess Curves
 
