@@ -395,6 +395,33 @@ sum(mtcyl.lm$res^2 )
 # r is square root of r^2
 sqrt(cylr2)
 
+mthp.lm <- lm(mpg~hp, mtcars)
+summary(mthp.lm)
+
+ggplot(mtcars, aes(y=mpg, x=wt)) +
+  geom_point() +
+  geom_smooth(method="lm", se=F, forumula=y~x)
+
+# SSE is the unexplained variability
+# sum( lmObject$res^2 )
+sum(mthp.lm$res^2 )
+
+# SSR is the explained variablility
+# sum( (lmObject$fit - mean(YourData$Y))^2 )
+(mthp.ssr <- sum( (mthp.lm$fit - mean(mtcars$mpg))^2 ))
+
+# SSTO
+#sum( (YourData$Y - mean(YourData$Y))^2 )
+(mthp.ssto <- sum( (mtcars$mpg - mean(mtcars$mpg))^2 ))
+
+
+# R2 is the ratio between explanation and total SSR/SSTO
+(wtr2 <-mthp.ssr/mtwt.ssto)
+
+
+# r is square root of r^2
+sqrt(wtr2)
+
 predict(mtcyl.lm, data.frame(cyl=3*365))
 
 par(mfrow=c(1,3))
@@ -2049,13 +2076,79 @@ curve(exp(beta0 + beta1*x)/(1+exp(beta0+beta1*x)), add=TRUE, lty=2) #true line
 # you can do the b0 + b1 twice (b0 + b_1x + b_2x_2 + b_2xx_2) for two lines
 ```
 ##### Quizzes logistic regression
+look at challenger example in 
 
-```{r}
-glm1 <- glm(birthyear ~ birthmonth, data=KidsFeet, family=binomial)
+
+
+```{r, fig.height=10, fig.width=10}
+library(tidyverse)
+library(mosaicData)
+??KidsFeet
+KidsFeet2 <- KidsFeet %>%
+  mutate(by88 = ifelse(birthyear == 88, 1, 0))
+View(KidsFeet2)
+glm1 <- glm(by88 ~ birthmonth, data=KidsFeet2, family=binomial)
+summary(glm1)
+predict(glm1, data.frame(birthmonth=5), type="response")
+
+glm2 <- glm(by88 ~ width, data=KidsFeet2, family=binomial)
+summary(glm2)
+predict(glm2, data.frame(width=9.5))
+
+glm1 <- glm(by88 ~ birthmonth, data=KidsFeet2, family=binomial)
 summary(glm1)
 
-```
+exp(-0.9992)
+a multiplier the odds
 
+1-0.3681739
+
+
+
+#2
+library(mosaic)
+
+boxplot(volume ~ precip>0, data=RailTrail, col="skyblue", xlab="90 Days of Records from April to November", ylab="Total Number of Users on the Trail that Day", main="Rain Seems to Reduce the Number of Users", names = c("Days with No Rain", "Rainy Days"))
+
+library(dplyr)
+View(RT)
+
+##ggplot needs 1s and 0s but base R can do FALSE TRUE
+RT <- RailTrail %>% 
+  mutate(precipOccurred = (precip > 0)) %>%
+  select(precipOccurred, lowtemp, spring, summer, fall, cloudcover, weekday)
+
+pairs(RT)
+
+
+glm.lt <- glm(precipOccurred ~ lowtemp, data=RT, family=binomial)
+summary(glm.lt)
+
+
+glm.cc <- glm(precipOccurred ~ cloudcover, data=RT, family=binomial)
+summary(glm.cc)
+
+glm.f <- glm(precipOccurred ~ fall, data=RT, family=binomial)
+summary(glm.f)
+
+predict(glm1, data.frame(birthmonth=5), type="response")
+
+glm.clt <- glm(precipOccurred ~ cloudcover + lowtemp, data=RT, family=binomial)
+summary(glm.clt)
+
+glm.csp <- glm(precipOccurred ~ cloudcover + spring, data=RT, family=binomial)
+summary(glm.csp)
+
+glm.csm <- glm(precipOccurred ~ cloudcover + summer, data=RT, family=binomial)
+summary(glm.csm)
+
+glm.clf <- glm(precipOccurred ~ cloudcover + fall, data=RT, family=binomial)
+summary(glm.clf)
+
+glm.cwd <- glm(precipOccurred ~ cloudcover + weekday, data=RT, family=binomial)
+summary(glm.cwd)
+```
+null is like ssto, residual deviance is like ssr
 <br>
 ### 14 
 standard error hint "residual standard error"
@@ -2090,6 +2183,7 @@ Linear Regression Summary
 
 ##### Generic
 Ctrl + L to clear console
+cex=character extension
 Getwd()<br>
 Glimpse() to see the data and it's types (good for when ? Doesn't work)<br>
 In rmd ctr shft c to comment/uncomment<br>
