@@ -1,0 +1,209 @@
+---
+title: "Pretest"
+output: html_document
+date: "2026-04-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r car}
+2 rlm()
+?cars
+c.lm <- lm(dist ~ speed, data=cars)
+summary(c.lm)
+```
+
+```{r}
+3
+c.lm <- lm(dist ~ speed, data=cars)
+#lowess
+plot(cars$speed, cars$dist)
+#### from lecture
+lines(lowess(cars$speed, cars$dist, f=0.2), col = "red")
+ggplot(cars, aes(x=speed, y=dist)) +
+  geom_point() +
+  geom_smooth(span=0.2)  #lowess is the default
+
+
+```
+```{r}
+#4
+logistic regression
+
+```
+
+
+```{r}
+#5
+#what conclusion
+
+```
+
+```{r}
+#6
+
+```
+
+```{r}
+#7 what is a robust regression line?
+mt.lm <- lm(hp~wt, data=mtcars)
+ggplot(mtcars, aes(x=wt, y=hp)) + 
+  geom_point() + 
+  geom_smooth(se=F, method="loess", method.args = list(degree=1), span=1)
+```
+
+```{r}
+# log regr titanic
+
+```
+
+```{r}
+#9
+19408 + -.1926*(40000) -2002 + .1202*40000
+
+```
+
+```{r}
+#10
+
+```
+
+```{r}
+#11
+
+```
+
+```{r}
+#12
+c.lm <- lm(dist ~ speed, data=cars)
+summary(c.lm)
+
+calculate_t_value(3.9324, 0.4155, 4.2)
+calculate_p_value(-0.6440433, 48)
+```
+
+```{r}
+#13
+a.lm <- lm(Temp~Month + I(Month^2), data=airquality)
+summary(a.lm)
+```
+
+```{r}
+#`15
+library(mosaic)
+?KidsFeet
+kf.lm <- lm(width~length, data=KidsFeet)
+predict(kf.lm, data.frame(length=25), interval = "prediction")
+```
+
+```{r}
+#16
+c.lm <- lm(dist ~ speed, data=cars)
+predict(c.lm, data.frame(speed=14))
+80-37.47463
+```
+
+```{r}
+#17 didn't look like the others, I have no idea what a robust regression is
+
+```
+
+```{r}
+#18
+?RailTrail
+rt.lm <- lm(volume ~ cloudcover, data=RailTrail)
+ggplot(RailTrail, aes(x=cloudcover, y=volume)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x) +
+  scale_x_continuous(n.breaks = 10)
+
+```
+
+```{r}
+#19
+sum((-7.1)^2, 13^2, (-7.4)^2, 4.1^2, (-2.7)^2)#298.27
+sum((-8.7)^2, 11^2, (-8.6)^2, 3^2, (-3.6)^2)#292.61
+sum((-19.6)^2, 6.8^2, (-7.3)^2, 10.4^2, (-9.9)^2)#689.6
+```
+
+```{r}
+#20
+View(Marriage)
+?Marriage
+m.lm <- lm()
+
+```
+
+```{r}
+#21
+?TenMileRace
+plot(time~age, data=TenMileRace, col=sex)
+lines.lm <- lm(time ~ age + sex, data=TenMileRace)
+summary(lines.lm)
+b <- coef(lines.lm)
+ggplot(TenMileRace, aes(x=age, y=time, color=sex)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x) +
+  stat_function(fun = function(x) b[1] + b[2]*x) +
+  stat_function(fun = function (x) (b[1] + b[3]) + b[2]*x)
+```
+
+```{r}
+#22
+aq.lm <- lm(Ozone~Wind + Temp + Wind:Temp, data=airquality)
+summary(aq.lm)
+b <- coef(aq.lm)
+ggplot(airquality, aes(x=Wind, y=Ozone, color=Temp)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x) +
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x)
+  #stat_function(fun = function (x) (b[1] + b[3]) + (b[2]*x + b[4]*x))
+
+```
+
+```{r}
+#25
+mt.lm <- lm(mpg~hp, data=mtcars)
+summary(mt.lm)
+ggplot(mt.lm, aes(x=hp, y=mpg)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)
+plot(mt.lm, which=1)
+boxCox(mt.lm) #lambda = 0 or log
+mt.lm.log <- lm(log(mpg)~hp, data=mtcars)
+summary(mt.lm.log)
+b <- coef(mt.lm.log)
+ggplot(mt.lm, aes(x=hp, y=mpg)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)+
+  stat_function(fun=function(x) exp(b[1] + b[2]*x))
+plot(mt.lm, which=1)
+predict(mt.lm.log, data.frame(hp=350))
+exp(2.26041) # convert it back
+```
+
+```{r}
+
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+
+
+```
+
+
+

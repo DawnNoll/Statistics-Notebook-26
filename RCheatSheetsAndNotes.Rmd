@@ -2079,5 +2079,118 @@ Filter into a new data set before summarizing<br>
 
 <a id=" Code Notes"></a>
 
+#### applr
+get_inverse_function() 
+This function analyzes the Left-Hand Side (LHS) of a formula and constructs
+a function that performs the mathematical inverse.
+takes A formula (e.g., log(y) ~ x) or an expression/call.
+returns
+A function accepting one argument (x) that returns the back-transformed value.
 
+diagnose()
+Generates a set of three diagnostic plots for a linear model object:
+Residuals vs Fitted, Normal Q-Q, and a plot of the residuals.
 
+lm_model <- lm(mpg ~ wt, data = mtcars)
+diagnose(lm_model)
+
+lm_equation()
+Takes a fitted linear model and returns a human-readable equation string showing
+the relationship between the response variable and predictors. This is useful for
+presenting model results in reports or understanding the mathematical form of the model.
+Coefficients are rounded to 3 significant figures for readability.
+model <- lm(mpg ~ disp + hp, data = mtcars)
+
+lm_latex()
+Takes a fitted linear model and generates a properly formatted LaTeX equation
+suitable for inclusion in R Markdown documents, academic papers, or presentations.
+The output includes underbrace notation to clearly label predicted values and
+predictor variables, making it ideal for educational or presentation purposes.
+Coefficients are rounded to 3 significant figures.
+model <- lm(width ~ length + I(length^2) + sex + sex:length + sex:I(length^2), KidsFeet)
+lm_latex(model)
+
+theme_lc() # based of Lauren Condie's work
+A custom ggplot2 theme that provides a cohesive, aesthetically pleasing color scheme
+and styling for statistical graphics. This theme sets both default geom aesthetics
+and plot theme elements to create a consistent visual style across all plots.
+The color palette uses warm, earthy tones that work well for academic and professional
+presentations.
+
+scatter_3d()
+Creates an interactive 3D visualization of a linear model with exactly 2 predictor variables.
+The function plots the original data points as scattered points in 3D space and overlays
+a semi-transparent regression surface showing the model predictions across the entire
+predictor space. This provides an intuitive way to understand how a linear model
+behaves across different combinations of two predictor variables.
+
+model <- lm(mpg ~ disp + hp, data = mtcars)
+scatter_3d(model, colors=c('blue','yellow'))
+lm_equation(model)
+
+geom_slice()
+\arguments{
+\item{model}{A linear model provided by 'lm()'}
+
+\item{n}{The number of predicted points across the graph - default 100}
+
+\item{inherit.aes}{Inherits the aes provided by 'ggplot' object}
+
+\item{predict_vars}{A list of specified variables and values that specify the slice - not required}
+
+\item{back_transform}{Optional. Either NULL (auto-detect), a function for back-transforming predictions,
+or a character string ("log", "log10", "log2", "sqrt", "exp", "inverse") specifying the transformation
+to reverse. Use this when the model has a transformed response variable (e.g., log(y)) but the plot
+displays the original scale.}
+
+\item{...}{Other variables (color, alpha, etc.)}
+}
+\value{
+A ggplot layer that displays the slice of the high dimensional model
+}
+\description{
+A 'ggplot' layer that takes a high dimensional model and displays the predicted
+model across each facet of a graph. This is the main user-facing function for
+adding model slices to ggplot2 graphs.
+}
+\examples{
+\dontrun{
+# Example: Using geom_slice without specifying 'predict_vars'
+model <- lm(mpg ~ disp + hp, data = mtcars)
+ggplot(mtcars, aes(x=disp,y=mpg))+
+geom_point()+
+facet_wrap(~hp)+
+geom_slice(model=model)
+
+# Example: Using geom_slice with 'predict_vars'
+model <- lm(mpg ~ disp + hp + gear, data = mtcars)
+ggplot(mtcars, aes(x=disp, y=mpg))+
+geom_point()+
+facet_wrap(~hp)+
+geom_slice(model=model, predict_vars=list(gear=4))
+
+# Example: Model with log transformation (auto-detected)
+model <- lm(log(mpg) ~ disp + hp, data = mtcars)
+ggplot(mtcars, aes(x=disp, y=mpg))+
+geom_point()+
+geom_slice(model=model, predict_vars=list(hp=110))
+
+# Example: Manual back-transformation specification
+model <- lm(log(mpg) ~ disp + hp, data = mtcars)
+ggplot(mtcars, aes(x=disp, y=mpg))+
+geom_point()+
+geom_slice(model=model, back_transform="log")
+}
+
+```{r, eval=FALSE, fig.height=4, fig.width=4}
+model <- lm(mpg ~ disp + hp + am, data = mtcars)
+slice_2d(model, xaxis = "disp")
+
+library(ggplot2)
+model <- lm(mpg ~ disp + hp + cyl, data = mtcars)
+ggplot(mtcars, aes(disp, mpg)) +
+  geom_point() +
+  facet_wrap(~cyl) +
+  geom_slice(model = model, predict_vars = list(hp = 110))
+
+```

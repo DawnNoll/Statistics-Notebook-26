@@ -2424,6 +2424,7 @@ boxCox(ut3quadnew.lm) # lambda from .5 to 1, so we'll leave it
 ut3qnew.lm <- lm(elecbill ~ kwh + year + temp + I(temp^2), data=Ut)
 
 summary(ut3qnew.lm)
+diagnose(ut3qnew.lm)
 pander(summary(ut3qnew.lm))
 
 plot(ut3quadnew.lm, which=1)
