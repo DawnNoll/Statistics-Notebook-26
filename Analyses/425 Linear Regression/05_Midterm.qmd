@@ -64,7 +64,7 @@ summary(aqlm)
 sum( aqlm$res^2 ) / 114 # or square the RSE
 ```
 
-2) Use the RailTrail data set in R from library(mosaic) to fit a regression to the following scatterplot. Compute the value of the residual for the solid dot labeled in the plot.
+2)  Use the RailTrail data set in R from library(mosaic) to fit a regression to the following scatterplot. Compute the value of the residual for the solid dot labeled in the plot.
 
 ```{r}
 View(RailTrail) 

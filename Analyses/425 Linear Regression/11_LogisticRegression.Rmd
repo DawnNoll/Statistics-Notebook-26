@@ -1,0 +1,106 @@
+---
+title: "Logistic Regression"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+m425 <- read.csv("C:/Users/ghsaund/Downloads/Math425PastGrades.csv", stringsAsFactors=TRUE)
+```
+
+```{r, fig.height=10, fig.width=10}
+m425 <- m425 %>%
+  mutate(final70 = ifelse(FinalExam > 70, 1, 0))
+
+pairs(m425, panel=panel.smooth)
+
+```
+
+
+```{r}
+glm1 <- glm(final70 ~ AssessmentQuizzes*MagicTwoGroups, data=m425, family=binomial)
+summary(glm1)
+
+glm2 <- glm(final70 ~ AssessmentQuizzes*MagicTwoGroups + Midterm, data=m425, family=binomial)
+summary(glm2)
+
+glm3 <- glm(final70 ~ AssessmentQuizzes*MagicTwoGroups*Midterm, data=m425, family=binomial)
+summary(glm3)
+
+m425 <- m425 %>%
+  mutate(ta = ifelse(Theory_Residuals + Theory_SamplingDists > 26, 1, 0),
+         an = Analysis_PredWeather + Analysis_CarPrices)
+
+myglm <- glm(final70 ~ Midterm + an + ta + AssessmentQuizzes + SkillsQuizzes + ClassActivitiesCompletedPerfectly + AttendedAlmostAlways, data=m425, family=binomial)
+summary(myglm)
+
+
+```
+
+
+## Model Validation
+
+```{r}
+set.seed(1)
+
+keep <- sample(1:nrow(m425), 100)
+
+mytrain <- m425[keep, ]
+mytest <- m425[-keep, ]
+
+mytrain_glm <- glm(final70 ~ Midterm + an + ta + AssessmentQuizzes + SkillsQuizzes + ClassActivitiesCompletedPerfectly + AttendedAlmostAlways, data=mytrain, family=binomial)
+
+myprobs <- predict(mytrain_glm, newdata=mytest, type="response")
+
+callit <- ifelse(myprobs > 0.5, 1, 0)
+
+#Confusion Matrix
+mycm <- table(callit, mytest$final70) #your call's compared to y-values
+
+PCC <- (mycm[1]+mycm[4])/sum(mycm)
+PCC
+```
+
+
+## Graphing
+
+```{r}
+myglm <- glm(final70 ~ Midterm + an + ta + AssessmentQuizzes + SkillsQuizzes + ClassActivitiesCompletedPerfectly + AttendedAlmostAlways, data=m425, family=binomial)
+
+b <- coef(myglm)
+
+plot(final70 ~ Midterm, data=m425)
+
+an = 25
+ta = 0
+AQ = 50
+SQ = 100
+CA = 1
+Attend = 1
+curve(1/(1+exp(-(b[1] + b[2]*Midterm + b[3]*an + b[4]*ta + b[5]*AQ + b[6]*SQ + b[7]*CA + b[8]*Attend))), add=TRUE, xname="Midterm")
+
+an = 25
+ta = 0
+AQ = 50
+SQ = 80
+CA = 1
+Attend = 1
+curve(1/(1+exp(-(b[1] + b[2]*Midterm + b[3]*an + b[4]*ta + b[5]*AQ + b[6]*SQ + b[7]*CA + b[8]*Attend))), add=TRUE, xname="Midterm")
+
+```
+
+
+
+## Interpretation
+
+```{r}
+exp(b)
+```
+
+
+

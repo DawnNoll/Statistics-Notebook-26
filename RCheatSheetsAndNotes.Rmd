@@ -351,7 +351,7 @@ sum(mtwt.lm$res^2 )
 (mtwt.ssto <- sum( (mtcars$mpg - mean(mtcars$mpg))^2 ))
 
 
-# R2 is the ration between explanation and total SSR/SSTO
+# R2 is the ratio between explanation and total SSR/SSTO
 (wtr2 <-mtwt.ssr/mtwt.ssto)
 
 
@@ -1794,9 +1794,9 @@ plot(cars$speed, cars$dist)
 # Add LOWESS line (default span is 2/3)
 lines(lowess(cars$speed, cars$dist), col = "red")
 
-
+plot(cars$speed, cars$dist)
 #### from lecture
-lines(lowess(cars$speed, cars$dist), f=0.2, col = "red") # lower more wiggly
+lines(lowess(cars$speed, cars$dist, f=0.2), col = "red") # lower more wiggly
 mylo <- loess(dist~speed, data=cars)
 summary(mylo) #the equivalest number of params in summary gives a hint as to what might fit the data well, the span tells how much of the data in each segment
 
@@ -2012,6 +2012,47 @@ The rest of the Lowess code is in broken
 
 ```{r}
 
+
+```
+
+
+
+### 11/12 Logistic Regression
+
+b0 controls where crosses y axis but when set to 0 example crosses at .5, the b1 is controlling left to right shift, rare to get the nice curve on real data
+
+Our model gives probabilities of y being 1
+
+```{r}
+set.seed(1)
+n <- 100
+beta0 <- -10
+beta1 <- 2
+
+x <- runif(n,0,10)
+prob <- exp(beta0+beta1*x)/(1+exp(beta0+beta1*x))
+
+y <- rbinom(n,1, prob) # coin toss
+
+plot(y~x, col=rgb(0,1,0, 0.1), pch=16, cex=2)
+
+myglm <- glm(y~x, family=binomial)
+summary(myglm)
+b <- coef(myglm)
+curve(exp(b[1] + b[2]*x)/(1+exp(b[1]+b[2]*x)), add=TRUE) # regression
+curve(exp(beta0 + beta1*x)/(1+exp(beta0+beta1*x)), add=TRUE, lty=2) #true line
+
+#quiz code: simplyamazing
+
+# you could do this whole thing with a b2*x^2 will create a u shape 
+# if the squared term is negative the quadratic (u) faces down, the b1 changes slope, shift -b1/2*b2 for the vertex of u
+# you can do the b0 + b1 twice (b0 + b_1x + b_2x_2 + b_2xx_2) for two lines
+```
+##### Quizzes logistic regression
+
+```{r}
+glm1 <- glm(birthyear ~ birthmonth, data=KidsFeet, family=binomial)
+summary(glm1)
 
 ```
 
