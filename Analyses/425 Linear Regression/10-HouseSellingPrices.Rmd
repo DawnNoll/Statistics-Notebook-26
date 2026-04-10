@@ -1,0 +1,134 @@
+---
+title: "House Selling Prices"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(car)
+library(mosaic)
+library(tidyverse)
+library(Applr)
+
+train <- read.csv("train.csv", stringsAsFactors = TRUE) %>%
+  mutate(Alley = as.character(Alley),
+         Alley = replace_na(Alley, "No Alley"),
+         Alley = as.factor(Alley)) %>%
+  mutate(Fence = as.character(Fence),
+         Fence = replace_na(Fence, "No Fence"),
+         Fence = as.factor(Fence))
+
+
+
+```
+
+
+```{r}
+lm.1stflr <- lm(SalePrice ~ X1stFlrSF, data=train)
+summary(lm.1stflr)
+
+lm.alley <- lm(SalePrice ~ Alley, data=train)
+summary(lm.alley)
+
+lm.fence <- lm(SalePrice ~ Fence, data=train)
+summary(lm.fence)
+```
+
+
+```{r}
+lm.1stflr <- lm(SalePrice ~ X1stFlrSF, data=train)
+summary(lm.1stflr)
+
+lm.2ndflr <- lm(SalePrice ~ X2ndFlrSF, data=train)
+summary(lm.2ndflr)
+
+lm.basement <- lm(SalePrice ~ TotalBsmtSF, data=train)
+summary(lm.basement)
+
+#Put them all together into a high dimensional multiple regression model
+
+lm.sqft.all <- lm(SalePrice ~ X1stFlrSF + X2ndFlrSF + TotalBsmtSF, data=train)
+summary(lm.sqft.all)
+
+#Or use mutate and create a new "TotalSF" variable that allows for a simple linear regression model that is just as powerful, but far easier to graph and interpret.
+
+train <- train %>%
+  mutate(TotalSF = X1stFlrSF + X2ndFlrSF + TotalBsmtSF)
+
+lm.sqft <- lm(SalePrice ~ TotalSF, data=train)
+summary(lm.sqft)
+
+plot(SalePrice ~ TotalSF, data=train)
+abline(lm.sqft)
+ 
+
+#Notice as well how mutate can be used to change complicated variables into simple on-off switches.
+
+train <- train %>%
+  mutate(TotalSF = X1stFlrSF + X2ndFlrSF + TotalBsmtSF,
+                RichNbrhd = case_when(Neighborhood %in% c("StoneBr", "NridgHt", "NoRidge") ~ 1,
+                                                          TRUE ~ 0))
+
+lm.sqft.rich <- lm(SalePrice ~ TotalSF + RichNbrhd + TotalSF:RichNbrhd, data=train)
+summary(lm.sqft.rich)
+
+ggplot(train, aes(x=TotalSF, y=SalePrice, color=as.factor(RichNbrhd))) + 
+  geom_point() + 
+  geom_smooth(method="lm")
+
+boxCox(lm.sqft.rich)
+
+
+log.sqft.rich <- lm(log(SalePrice) ~ TotalSF + RichNbrhd, data=train)
+summary(log.sqft.rich)
+
+exp(log.sqft.rich$coefficients)
+```
+
+
+
+```{r}
+lm3d <- lm(SalePrice ~ TotalSF + YearBuilt + TotalSF:YearBuilt, data=train)
+
+scatter_3d(lm3d)
+
+par(mai=c(1,1,1,1.3))
+plot(SalePrice ~ TotalSF, data=train)
+
+add_slice_2d(lm3d, xaxis="TotalSF", YearBuilt=1947)
+add_slice_2d(lm3d, xaxis="TotalSF", YearBuilt=1957)
+add_slice_2d(lm3d, xaxis="TotalSF", YearBuilt=1967)
+add_slice_2d(lm3d, xaxis="TotalSF", YearBuilt=1977)
+
+
+```
+
+
+```{r}
+lmhd <- lm(SalePrice ~ TotalSF * YearBuilt * ScreenPorch * GrLivArea, data=train)
+summary(lmhd)
+
+plot(SalePrice ~ ScreenPorch, data=train)
+
+add_slice_2d(lmhd, xaxis="TotalSF", YearBuilt=1974, ScreenPorch=0, GrLivArea=1515)
+
+add_slice_2d(lmhd, xaxis="TotalSF", YearBuilt=1974, ScreenPorch=100, GrLivArea=1515)
+
+add_slice_2d(lmhd, xaxis="ScreenPorch", YearBuilt=2024, TotalSF=3500, GrLivArea=333, col="red")
+
+add_slice_2d(lmhd, xaxis="ScreenPorch", YearBuilt=2024, TotalSF=3500, GrLivArea=1750, col="green")
+
+add_slice_2d(lmhd, xaxis="ScreenPorch", YearBuilt=2024, TotalSF=3500, GrLivArea=3500, col="blue")
+
+lm_latex(lmhd)
+```
+
+
+$$
+\underbrace{\hat{Y_i}}_{\text{Pred. SalePrice}} = -1650000 + 44.4\underbrace{X_{1i}}_{\text{TotalSF}} + 846\underbrace{X_{2i}}_{\text{YearBuilt}} - 146\underbrace{X_{3i}}_{\text{ScreenPorch}} + 33.9\underbrace{X_{4i}}_{\text{GrLivArea}} + 0.124\underbrace{X_{5i}}_{\text{ScreenPorch:GrLivArea}}
+$$

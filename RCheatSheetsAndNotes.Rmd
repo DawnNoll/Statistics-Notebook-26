@@ -1788,9 +1788,83 @@ curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE, col='hotpink')
 ##### Quizzes: Model Types
 
 See Skills quiz different types of models in this folder
+```{R}
+1
+What is the equation of the regression function shown in this plot?
+  ## Code to make this graphic...
 
+> ggplot(Wages1, aes(x=school, y=wage)) + geom_point(color=rgb(.3,.3,.2,.4)) + geom_smooth(method="lm", formula= y ~ poly(x, 2, raw=TRUE), se=F, col=rgb(.3,.3,.2,.8)) + theme_bw() + labs(title="Best wages for highest schooling... or no schooling?", subtitle="Wages1 data, library(Ecdat)", x="Number of years of Schooling (school)", y="Current Hourly Wage in 1980's USD (wage)")
 
+ 
 
+## Code needed to obtain the solution...
+
+> summary(lm(wage ~ school + I(school^2), data=Wages1))
+
+Call:
+lm(formula = wage ~ school + I(school^2), data = Wages1)
+
+Residuals:
+Min 1Q Median 3Q Max
+-7.337 -1.998 -0.474 1.444 34.554
+
+Coefficients:
+                      Estimate    Std. Error     t value    Pr(>|t|)
+(Intercept)       6.13334      1.46274       4.193    2.82e-05 ***
+school            -0.68354      0.25743      -2.655    0.00796 **
+I(school^2)      0.05488       0.01129       4.859   1.23e-06 ***
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.126 on 3291 degrees of freedom
+Multiple R-squared: 0.08636, Adjusted R-squared: 0.0858
+F-statistic: 155.5 on 2 and 3291 DF, p-value: < 2.2e-16
+
+ 
+
+ 
+
+## Code to draw the plot in base graphics...
+
+> plot(wage ~ school, data=Wages1, pch=16, col=rgb(.3,.3,.2,.4), main="Best wages for highest schooling... or no schooling?",  xlab="Number of years of Schooling (school)", ylab="Current Hourly Wage in 1980's USD (wage)")
+
+> mtext(side=3, text="Wages1 data, library(Ecdat)")
+
+> abline(v=seq(2,16,2), h=seq(0,40,10), lty=2, col=rgb(.2,.2,.2,.2))
+
+> wages.lm <- lm(wage ~ school + I(school^2), data=Wages1)
+
+> b <- coef(wages.lm)
+
+> curve(b[1] + b[2]*x + b[3]*x^2, add=TRUE, col=rgb(.3,.3,.2,.8), lwd=2)
+
+ 3
+ Open the Loblolly data set in R.
+
+Which regression model shows the best linearity according to the residuals vs fitted values plot of that regression?
+ plot(lm(height ~ age + I(age^2), data=Loblolly), which=1)
+
+plot(lm(height ~ age + I(age^2) + I(age^3), data=Loblolly), which=1)
+
+plot(lm(height ~ age + I(age^2) + I(age^3) + I(age^4), data=Loblolly), which=1)
+
+plot(lm(height ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5), data=Loblolly), which=1)
+
+will show the last one has the "flattest" red line, witnessing the greatest "linear" fit of the data. If you wanted to resolve the lack of constant variance, you could then apply: 
+
+boxCox(lm(height ~ age + I(age^
+                             2) + I(age^3) + I(age^4) + I(age^5), data=Loblolly))
+
+and the resulting transformation looks quite nice:
+
+plot(lm(sqrt(sqrt(height)) ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5), data=Loblolly), which=1)
+
+except linearity is still lacking...
+
+plot(lm(sqrt(sqrt(height)) ~ age + I(age^2) + I(age^3) + I(age^4) + I(age^5), data=Loblolly), which=2)
+
+ 
+```
 
 ### 07 Lowess
 
@@ -2084,11 +2158,22 @@ look at challenger example in
 library(tidyverse)
 library(mosaicData)
 ??KidsFeet
+#Use the KidsFeet data set from library(mosaic) to practice fitting a logistic regression.
+# Is birthmonth enough information to predict the birthyear of a fourth grade student? Fit a logistic regression of birthyear == 88 on the birthmonth of a child to find out.
+# p(birthyear_i=88|birthmonth_i) = e^(B0+B1birthmonth)/(1+eB0+B1birthmonth)
+
+#Enter the values of your estimates for  β0
+  and  β1
+ in the logistic model:
 KidsFeet2 <- KidsFeet %>%
   mutate(by88 = ifelse(birthyear == 88, 1, 0))
 View(KidsFeet2)
+#Fit a new model using only the width of the child's foot instead of birthmonth to predict the birthyear of the child. Is foot width a better or worse predictor of the birthyear of the child than birthmonth?
+
+#State the AIC, null deviance, and residual deviance of both logistic regression models.
 glm1 <- glm(by88 ~ birthmonth, data=KidsFeet2, family=binomial)
 summary(glm1)
+#Use the better model of the two models from parts (a) and (b) to predict the probability that a fourth grade boy (from the same era as the students in this data) was born in 88 given they had a foot width of 9.5 cm, a foot length of 24, and was born in May. (This is more information than you need to make the prediction.)
 predict(glm1, data.frame(birthmonth=5), type="response")
 
 glm2 <- glm(by88 ~ width, data=KidsFeet2, family=binomial)
@@ -2097,19 +2182,33 @@ predict(glm2, data.frame(width=9.5))
 
 glm1 <- glm(by88 ~ birthmonth, data=KidsFeet2, family=binomial)
 summary(glm1)
+Interpret the effect on the odds that the slope term from the model used in Part (c) has on the odds of a fourth grade child being born in 88.
+ 
 
-exp(-0.9992)
-a multiplier the odds
+#  Answer: "The odds of the child being born in 88 decrease by   
+63.18261
+ % for each one month increase in the birthmonth (1 being January and 12 being December). In other words, a child born in February has an odds of being born in 88 that is   
+63.18261
+% less than a child that was born in January. And the same is true for any two consecutive months."
 
-1-0.3681739
+ 
+
+exp(-0.9992) e^b1 
+#a multiplier the odds
+
+1-0.3681739 but then 1-the for that one
 
 
 
 #2
 library(mosaic)
-
+#Consider the `?RailTrail` data set in library(mosaicData). As shown by the boxplot below, the number of users on the rail trail seems to be influenced by whether or not there was any precipitation on that day.
 boxplot(volume ~ precip>0, data=RailTrail, col="skyblue", xlab="90 Days of Records from April to November", ylab="Total Number of Users on the Trail that Day", main="Rain Seems to Reduce the Number of Users", names = c("Days with No Rain", "Rainy Days"))
 
+
+#The goal of this question is to identify a logistic regression model that could be used to predict if there will be rain on a given day or not.
+
+#Run the following commands to reduce the data to variables of interest for this problem.
 library(dplyr)
 View(RT)
 
@@ -2120,7 +2219,13 @@ RT <- RailTrail %>%
 
 pairs(RT)
 
+#Fit three logistic regression models. The first should use lowtemp to predict precipitation. The second should use cloudcover to predict precipitation. The third should use fall to predict precipitation.
 
+Compare the AIC and residual deviance of each model, which one is "better"?
+
+ 
+
+Note that each model has a null deviance of 113.14 because that all use the same y-variable and have no missing values in the x-variables. It is wise to check that the null deviance of models you are comparing match up, otherwise, their residual deviances and AIC values aren't directly comparable.
 glm.lt <- glm(precipOccurred ~ lowtemp, data=RT, family=binomial)
 summary(glm.lt)
 
@@ -2132,6 +2237,8 @@ glm.f <- glm(precipOccurred ~ fall, data=RT, family=binomial)
 summary(glm.f)
 
 predict(glm1, data.frame(birthmonth=5), type="response")
+
+Try every possible 2-variable (no interaction term) logistic regression model that uses both (1) the best variable from Part (b), and (2) each of the other variables in the RT data set, one at a time. Note the AIC of each model. The best two-variable model for this data is has an AIC of 82.75 and is given by:
 
 glm.clt <- glm(precipOccurred ~ cloudcover + lowtemp, data=RT, family=binomial)
 summary(glm.clt)
@@ -2147,6 +2254,15 @@ summary(glm.clf)
 
 glm.cwd <- glm(precipOccurred ~ cloudcover + weekday, data=RT, family=binomial)
 summary(glm.cwd)
+
+However, the p-value for the   
+weekday
+  variable is not significant in this model. Also, it is interesting to note that the AIC of this mode is   
+  than the one-variable model that just uses   
+cloudcover
+ to predict precipitation occurring. This is a good witness that the AIC helps pretect against over-fitting models.
+
+ 
 ```
 null is like ssto, residual deviance is like ssr
 <br>
@@ -2329,3 +2445,426 @@ ggplot(mtcars, aes(disp, mpg)) +
   geom_slice(model = model, predict_vars = list(hp = 110))
 
 ```
+
+ Plot a 3D-grapheable linear model
+#'
+#' Creates an interactive 3D visualization of a linear model with exactly 2 predictor variables.
+#' The function plots the original data points as scattered points in 3D space and overlays
+#' a semi-transparent regression surface showing the model predictions across the entire
+#' predictor space. This provides an intuitive way to understand how a linear model
+#' behaves across different combinations of two predictor variables.
+#'
+#' @param model A saved linear model with 2 predictor variables
+#' @param n Number of evaluations for creating the surface grid
+#' @param colors Colors used for the gradient scale
+#'
+#' @returns A 3D graph in the viewer section
+#'
+#'
+#' @examples
+#' \dontrun{
+#' model <- lm(mpg ~ disp + hp, data = mtcars)
+#' scatter_3d(model, colors=c('blue','yellow'))
+#' }
+#'
+#' @importFrom tidyr pivot_wider
+#' @importFrom plotly plot_ly add_markers add_trace
+#' @importFrom graphics lines
+#' @importFrom stats coef predict terms setNames formula predict.lm
+#'
+#' @export
+scatter_3d <- function(model, n=100, colors = c('blue', 'yellow')){
+
+  # Validate that the input is a linear model
+  if (!inherits(model, 'lm'))
+    stop('Model must be in lm format')
+
+  # Extract all variable names from the model formula
+  # This includes the response variable and all predictors
+  vars <- all.vars(formula(model))
+
+  # Check that model has exactly 3 variables (1 response + 2 predictors)
+  # More than 3 variables cannot be meaningfully displayed in 3D
+  if(length(vars) > 3)
+    stop('Not 3D Graphable, Reduce lm to 2 predictor variables')
+
+  # Extract the data for response and predictor variables from the fitted model
+  # The model$model data frame contains the original data used to fit the model
+  y <- model$model[1][[1]]        # Response variable (e.g., mpg)
+  x1 <- model$model[2][[1]]       # First predictor (e.g., disp)
+  x2 <- model$model[3][[1]]       # Second predictor (e.g., hp)
+
+  # Get variable names for labeling axes
+  y_name <- names(model$model)[1]   # Response variable name
+  x1_name <- names(model$model)[2]  # First predictor name
+  x2_name <- names(model$model)[3]  # Second predictor name
+
+  # Create a clean data frame with proper column names for plotting
+  df <- setNames(data.frame(y,x1,x2), c(y_name, x1_name, x2_name))
+
+  # Ensure x1 is numeric for creating the 3D surface
+  # Convert factors to numeric values if necessary
+  if (!is.numeric(x1)) {
+    if (!is.factor(x1)) x1 <- as.factor(x1)  # Convert to factor first if character
+    x1 <- as.numeric(x1)                      # Then convert to numeric
+  }
+
+  # Ensure x2 is numeric for creating the 3D surface
+  # Convert factors to numeric values if necessary
+  if (!is.numeric(x2)) {
+    if (!is.factor(x2)) x2 <- as.factor(x2)  # Convert to factor first if character
+    x2 <- as.numeric(x2)                      # Then convert to numeric
+  }
+
+  # Create sequences of values across the range of each predictor
+  # These will form a grid for generating the prediction surface
+  axisx <- seq(min(x1), max(x1), length.out=n)  # x1 values for surface
+  axisy <- seq(min(x2), max(x2), length.out=n)  # x2 values for surface
+
+  # Create a grid of all combinations of x1 and x2 values
+  # expand.grid creates a data frame with every combination of the input vectors
+  surface <- expand.grid(setNames(list(axisx, axisy), c(x1_name,x2_name)), KEEP.OUT.ATTRS = F)
+
+  # Ensure factor levels are preserved if original variables were factors
+  # This is important for proper prediction with categorical variables
+  if (is.factor(x1))
+    surface[[x1_name]] <- factor(surface[[x1_name]], levels = levels(x1))
+
+  if (is.factor(x2))
+    surface[[x2_name]] <- factor(surface[[x2_name]], levels = levels(x2))
+
+  # Generate predictions for every point on the surface grid
+  # This creates the Z-values (height) for the 3D surface
+  surface$Z <- predict.lm(model, newdata = surface)
+
+  # Reshape the surface data from long format to wide format
+  # This creates a matrix suitable for plotly's surface plotting
+  # Each row represents a y-axis value, each column an x-axis value
+  widesurface <- pivot_wider(
+    surface,
+    names_from = !!sym(x1_name),      # Columns will be x1 values
+    values_from = Z                    # Cell values will be predictions
+  )
+
+  # Convert to matrix format and set row names for the surface plot
+  surface <- as.matrix(widesurface[,-1])           # Remove first column (x2 values)
+  rownames(surface) <- widesurface[[x2_name]]     # Set row names as x2 values
+
+  # Create the 3D plot using plotly
+  # This uses dynamic code generation to handle variable names properly
+  eval(parse(text=paste0("plot_ly() %>%",
+    # Add the original data points as 3D scatter points
+    "add_markers(data=df,",
+         "x=~",x1_name,",",              # x-axis: first predictor
+         "y=~",x2_name,",",              # y-axis: second predictor  
+         "z=~",y_name,",",               # z-axis: response variable
+         "type='scatter3d',",
+         "mode='markers',",
+         "colors = colors) %>%",
+    # Add the regression surface
+    "add_trace(z=surface,",             # z-values: predicted responses
+              "x=axisx,",               # x-values: first predictor range
+              "y=axisy,",               # y-values: second predictor range
+              "type='surface',",
+              "opacity = 0.6)")))       # Semi-transparent surface
+}
+
+
+
+#' 2D Slicer
+#'
+#' Take a linear model and display a 2D slice in base R. This function creates
+#' a new plot comparing the response y variable with one predictor x variable
+#' and displaying a linear model line with all other predictor variables
+#' held at constant values. For unspecified variables, the xaxis is assumed
+#' to be the first predictor in the model and all other variable are imputed
+#' (mean for numeric, most common for factors).
+#'
+#' @param model A linear model
+#' @param xaxis A non-required specification of the xaxis variable; default is first x var in lm
+#' @param n Number of displayed points; default is 100
+#' @param caption Boolean to include caption with values of predictor variables not shown in the chart, TRUE by default
+#' @param back_transform Either 1) A function to back transform the predicted y values and interval bounds (e.g., `exp` or `\(x) exp(x)` for log-transformed models), or 2) a boolean stating whether it should apply a transformation or not (`FALSE` turns off back_transform). In most cases, this does not need to be specified as the function infers the transformation needed reliably.
+#' @param ... Remaining vars (color, linetype, etc.)
+#'
+#' @returns A 2D graph of a sliced model
+#'
+#' @importFrom graphics lines
+#' @importFrom stats coef predict terms setNames formula predict.lm
+#'
+#' @examples
+#' \dontrun{
+#' model <- lm(mpg ~ disp, data = mtcars)
+#' slice_2d(model, xaxis = 'disp')
+#' }
+#'
+#' @export
+slice_2d <- function(model,xaxis=NULL,n=100,caption=TRUE, back_transform=TRUE, ...){
+
+  # Prepare data
+  prep <- prepare_slice_data(model, xaxis, n, caption, back_transform, ...)
+
+  orig_data <- prep$orig_data
+  new_data <- prep$new_data
+  xaxis <- prep$xaxis
+  y_name <- prep$y_name
+  plot_args <- prep$plot_args
+  caption_text <- prep$caption_text
+
+  # PLOT
+
+  # Create the base plot with original data points
+  plot(orig_data[[y_name]] ~ orig_data[[xaxis]],
+       xlab = xaxis,
+       ylab = y_name,
+       main = deparse(formula(model)),
+       pch = 19,
+       col = "steelblue")
+
+  # Add the prediction line to show the model slice
+  # do.call used for lines function to allow a list "plot_args" in place of ...
+  do.call(lines, c(list(x = new_data[[xaxis]], y = new_data$preds), plot_args))
+
+  # Add a caption with predictor values that aren't visible in the plot
+  # While this is functional to some extent, it has a clear complex problem,
+  # which is detailed at the bottom of the file.
+  if (caption) {
+    # Add the caption to the plot
+    mtext(caption_text, # text
+          side = 3, # Top margin
+          line = 0.5, # Just under the title (line 0.5)
+          adj = 0, # Left-align
+          # cex = 0.8, # Smaller text size
+          col = "gray40")
+  }
+}
+
+
+#' 2D Slice to R Plot
+#'
+#' Take a slice from a linear model and add the displayed graph to a preexisting R plot.
+#' This function is similar to slice_2d() but adds a line to an existing plot rather
+#' than creating a new one. Useful for overlaying multiple model slices or adding
+#' model predictions to scatter plots.
+#'
+#' @param model A linear model
+#' @param xaxis A non-required specification of the xaxis variable; default is first x var in lm
+#' @param n Number of displayed points; default is 100
+#' @param caption Boolean to include caption with values of predictor variables not shown in the chart, FALSE by default
+#' @param back_transform Either 1) A function to back transform the predicted y values and interval bounds (e.g., `exp` or `\(x) exp(x)` for log-transformed models), or 2) a boolean stating whether it should apply a transformation or not (`FALSE` turns off back_transform). In most cases, this does not need to be specified as the function infers the transformation needed reliably.
+#' @param ... Remaining vars (color, linetype, etc.)
+#'
+#' @returns A line added to a preexisting R plot displaying a 2D graphable slice of an HD model
+#'
+#' @importFrom graphics lines
+#' @importFrom stats coef predict terms setNames formula predict.lm
+#'
+#' @examples
+#' \dontrun{
+#' model <- lm(mpg ~ disp + hp, data = mtcars)
+#' plot(mpg ~ disp, data = mtcars)
+#' add_slice_2d(model,xaxis='disp', hp=100)
+#' }
+#'
+#' @export
+add_slice_2d <- function(model,xaxis=NA,n=100,caption=FALSE, back_transform=TRUE, ...){
+
+  # Prepare data
+  prep <- prepare_slice_data(model, xaxis, n, caption, back_transform, ...)
+
+  new_data <- prep$new_data
+  xaxis <- prep$xaxis
+  plot_args <- prep$plot_args
+  caption_text <- prep$caption_text
+
+  # Warn if the slice is outside the current plot window
+  usr <- try(par("usr"), silent = TRUE)
+  if (!inherits(usr, "try-error") && is.numeric(usr)) {
+    xlim <- usr[1:2]; ylim <- usr[3:4]
+    xr <- range(new_data[[xaxis]], na.rm = TRUE)
+    yr <- range(new_data$preds, na.rm = TRUE)
+    if (xr[2] < xlim[1] || xr[1] > xlim[2] || yr[2] < ylim[1] || yr[1] > ylim[2]) {
+      warning("Slice is outside the current plot range; the line may not be visible or aligned.")
+    }
+  }
+
+  # Add the prediction line to the existing plot
+  # Note: This assumes a plot already exists - it will error if no plot is active
+  # do.call used for lines function to allow a list "plot_args" in place of ...
+  do.call(lines, c(list(x = new_data[[xaxis]], y = new_data$preds), plot_args))
+
+  # Add a caption with predictor values that aren't visible in the plot
+  if (caption) {
+    # Add the caption to the plot
+    mtext(caption_text, # text
+          side = 3, # Top margin
+          line = 0.5, # Just under the title (line 0.5)
+          adj = 0, # Left-align
+          # cex = 0.8, # Smaller text size
+          col = "gray40")
+  }
+}
+
+
+# This data preparation is shared by both slice_2d and add_slice_2d
+prepare_slice_data <- function(model, xaxis, n, caption, back_transform=TRUE, ...) {
+  # Validate that the input is a linear model
+  if (!inherits(model, 'lm')) {
+    stop("Model must be in lm() format")
+  }
+
+  # Check for '$' in variable names
+  for (name in names(model$model)) {
+    if (grepl("\\$", name)) stop("Cannot use lm with '$' in its variable names")
+  }
+
+  # Get original variable names
+  var_names <- all.vars(formula(model))
+  y_name <- var_names[1]
+
+  # Determine xaxis if not specified
+  if (is.null(xaxis) || is.na(xaxis)) {
+    xaxis <- var_names[2]  # Position 1 is the response variable
+    message(paste0("X-axis not specified - Used first x variable as x-axis",
+                   "\n    To specify, use 'xaxis = \"var_name\"' such as 'xaxis = \"",
+                   xaxis, "\"'"))
+  }
+
+  # Validate that the specified x-axis variable exists in the model
+  if (!(xaxis %in% var_names)) {
+    stop(paste0("xaxis variable '", xaxis, "' not found in the model."))
+  }
+
+  # Extract original data
+  if (!is.null(model$call$data)) {
+    orig_data <- eval(model$call$data, envir = environment(formula(model)))
+  } else {
+    orig_data <- data.frame(
+      sapply(var_names, FUN = \(v) get(v, environment(formula(model))))
+    )
+  }
+
+  # Validate x-axis variable is numeric
+  if (!is.numeric(orig_data[[xaxis]])) {
+    stop(paste0("`xaxis` must be numeric; the class \"", class(orig_data[[xaxis]]), "\" is not supported."))
+  }
+
+  # Find all other variables in the model
+  other_vars <- setdiff(var_names, c(y_name, xaxis))
+
+  # Get any arguments passed via ...
+  dots <- list(...)
+
+  # For each "other" variable, determine what value to hold it at
+  other_vals <- lapply(other_vars, function(var) {
+    if (!is.null(dots[[var]])) {
+      dots[[var]]
+    } else {
+      col <- orig_data[[var]]
+      if (is.numeric(col)) {
+        m <- mean(col, na.rm = TRUE)
+        message(paste0("Value for `", var, "` not specified -",
+                       " Used mean: ", round(m, 1),
+                       "\n    To specify, use 'var_name = value', such as '",
+                       var, " = ", round(m, 1), "'"))
+        m
+      } else if (is.factor(col)) {
+        l <- levels(col)[1]
+        message(paste0("Value for `", var, "` not specified -",
+                       " Used first value: ", l,
+                       "\n    To specify, use 'var_name = value', such as '",
+                       var, " = ", l, "'"))
+        l
+      } else {
+        stop(paste0("Unsupported variable type for: `", var, "`"))
+      }
+    }
+  })
+
+  # Convert the constant values into a data frame format
+  x_names <- as.data.frame(as.list(setNames(other_vals, other_vars)))
+
+  # Create an evenly spaced sequence of values across the range of the x axis
+  x_vals <- seq(min(orig_data[[xaxis]], na.rm = TRUE), max(orig_data[[xaxis]], na.rm = TRUE), length.out = n)
+
+  # Prepare x values for the predict() function
+  new_data <- setNames(data.frame(x_vals), xaxis)
+
+  # Add the constant values for all other variables
+  if (length(other_vars) > 0) {
+    new_data <- cbind(new_data, x_names)
+  }
+
+  # Create y-values for all the new data points
+  new_data$preds <- predict(model, newdata = new_data)
+
+  # Get y transformation
+  # If they say no, don't transform
+  if (is.logical(back_transform) && back_transform == FALSE) {
+    inverse <- identity
+
+  # If they specify a valid function, go with that
+  } else if (is.function(back_transform) && length(formals(back_transform)) == 1) {
+    inverse <- back_transform
+
+  # Otherwise, infer the back transformation
+  } else if (is.logical(back_transform) && back_transform == TRUE) {
+    inverse <- get_inverse_function(formula(model))
+
+  # And if they specified something invalid, warn them
+  } else {
+    warning(paste0("The back_transform argument`", back_transform,
+                  "` is not a valid function or boolean.",
+                  "\n    Inferring transformation from lm."))
+    inverse <- get_inverse_function(formula(model))
+  }
+
+  # Apply transformation
+  new_data$preds <- inverse(new_data$preds)
+
+  # Separate model values from plotting arguments in ...
+  plot_args <- dots[!names(dots) %in% other_vars]
+
+  # Generate caption
+  caption_text <- ""
+  if (caption) {
+    for (i in seq_along(other_vars)) {
+      if (i > 1) {
+        caption_text <- paste0(caption_text, "; ")
+      }
+      if (is.numeric(other_vals[[i]])) {
+        caption_text <- paste0(caption_text, other_vars[i], ": ", round(other_vals[[i]], 1))
+      } else {
+        caption_text <- paste0(caption_text, other_vars[i], ": ", other_vals[i])
+      }
+    }
+  }
+
+  list(
+    orig_data = orig_data,
+    new_data = new_data,
+    xaxis = xaxis,
+    y_name = y_name,
+    plot_args = plot_args,
+    caption_text = caption_text,
+    other_vars = other_vars,
+    other_vals = other_vals
+  )
+}
+
+
+
+# On captioning
+  # Because Base R uses a "painter" system, subsequent text appears on top of
+  # the previous text caption. One solution is place future captions below the
+  # previous, but the plot size can't be adjusted (it was already painted).
+  # The next idea is to access the previous caption and update it. However,
+  # it is simply drawn on the plot and not accessible as an object. So, it
+  # could be made into an object and each caption an environment variable. This
+  # has two more problems. It doesn't reset with a new plot, and therefore will
+  # bleed into future plots. Additionally, a white rectangle needs to be
+  # painted on top of the existing text to accommodate the new text.
+  # Possible probably. Complicated definitely.
+  #
+  # By default it is on for slice_2d, but off for add_slice_2d, because slice_2d
+  # creates a fresh plot with nothing to overwrite.

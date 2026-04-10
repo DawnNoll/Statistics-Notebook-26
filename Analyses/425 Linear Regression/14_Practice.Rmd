@@ -8,21 +8,28 @@ date: "2026-04-09"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+1)a When using Yhat_i we need to refer to the estimates of the B0 and B1
+terms instead of their "true" values. Typically we do this with b0 and b1
+but the real error is in labeling y-hat with "weight". It should be labeled as "predicted weight" or "estimated mean weight" or something else that emphasizes that it is the estimate of the "average weight" for every given x-value. It is no longer the weight of an individual, that is what Y_i
+represents.
 
 ```{r car}
-2 rlm()
+2 a
+rlm()
 ?cars
 c.lm <- lm(dist ~ speed, data=cars)
 summary(c.lm)
+
+#ans
+#Yhat <- -17 + 4.2*cars$speed
+Ybar <- mean(cars$dist)
+SSE <- sum( (Yhat - cars$dist)^2 )
+SSTO <- sum( (cars$dist - Ybar)^2 )
+1 - SSE/SSTO
 ```
 
 ```{r}
-3
+#3 a the top with 2 mountains
 c.lm <- lm(dist ~ speed, data=cars)
 #lowess
 plot(cars$speed, cars$dist)
@@ -35,54 +42,103 @@ ggplot(cars, aes(x=speed, y=dist)) +
 
 ```
 ```{r}
-#4
-logistic regression
+#4 a
+# logistic regression
+# A logistic regression is performed to model the probability that a student will get an A in Math 325 based on their Analysis score. The following output is obtained.
+# 
+# Which of the following is a correct interpretation of this output?
+#   
+#  ####Ans The odds of a student getting an A in Math 325 triple for every extra point a student gains in their Analysis Total score. 
+# We need to compute 
+# in order to determine the effect on the odds that an extra point in the Analysis Total impacts the odds of getting an A in Math 325.
+# 
+# This shows 3.134, which means the odds are being multiplied by 3.134 for each increase in Analysis Total. This means the odds are tripling for each extra point in the Analysis Total category.
+# 
+exp(1.1423) #this was estimated slope
+[1] 3.133968
 
 ```
 
 
 ```{r}
 #5
-#what conclusion
+#what conclusion about the model
+This regression model significantly predicts the mean Y-value, but does not do the best job at predicting the individual Y values.
+The p-value tells us if the X-variable can significantly predict the average y-value. Since the p-value is significant (3.41e-08), X is useful for predicting the average y-value. However, since the R-squared value is 0.5655, the model does not really offer very much insight on the individual y-values because they vary so much from the line. When the R-squared value is close to 1, then the regression model gives great insight about both the mean, and the individuals.
 
 ```
 
 ```{r}
 #6
-
+The only "added variable plot" that has information in it is the one of R compared to X2. That plot shows a cupping shape, implying that a higher order term for X2 is needed. Since the shape is parabolic, it would be wisest to add a quadratic term to the current model, to obtain Y ~ X2 + I(X2^2).
 ```
 
 ```{r}
-#7 what is a robust regression line?
+#7d what is a robust regression line?
+#Use the mtcars data set in R to plot the robust regression line for hp ~ wt. 
+
+Identify the robust regression line in the plot below.
 mt.lm <- lm(hp~wt, data=mtcars)
 ggplot(mtcars, aes(x=wt, y=hp)) + 
   geom_point() + 
   geom_smooth(se=F, method="loess", method.args = list(degree=1), span=1)
+
+
+ans
+plot(hp ~ wt, data=mtcars)
+
+abline(rlm(hp ~ wt, data=mtcars), col="dodgerblue", lwd=2) #correct answer
+
+abline(lm(hp ~ wt, data=mtcars), col="green", lwd=2)
+
+abline(-.5, 35, col="orange", lwd=2)
+
+abline(-2, 50, col="firebrick", lwd=2)
+
+mtext(side=3, text="mtcars data set")
+
 ```
 
 ```{r}
-# log regr titanic
+# 8alog regr titanic
 
 ```
 
 ```{r}
-#9
+#9a
+#Based on the information shown below, what is the predicted cost of a Toyota Corolla with 40,000 miles on it?
 19408 + -.1926*(40000) -2002 + .1202*40000
+To get the answer you must use the coefficients in the summary output below the graph.
+
+Then the equation becomes:
+
+    (intercept)    mileage   *   miles        corolla      corrolla:mileage * miles
+
+> 19408 - 0.1926*40000-2002+0.1202*40000
+[1] 14510
 
 ```
 
 ```{r}
-#10
-
+#10a
+#Which of the following is a "best" statement to make when interpreting a regression slope?
+#The change in the average y-value per unit change in x.
+#
+The regression line models the average y-value for any given x-value. Since the slope is the change in the line as x changes by 1 unit, then the slope should be interpreted as the change in the average y-value (the line) for each unit change in x.
 ```
 
 ```{r}
-#11
-
+#11a
+choose lowest sse
 ```
 
 ```{r}
-#12
+#12a
+#Use the cars data set in R to test the following hypotheses.
+
+Y_i(dist = B0 +B1Xi(speed) + epsilon)
+Ho:B1 = 4.2 Ha:B1notequal 4.2
+ans .52
 c.lm <- lm(dist ~ speed, data=cars)
 summary(c.lm)
 
@@ -91,13 +147,25 @@ calculate_p_value(-0.6440433, 48)
 ```
 
 ```{r}
-#13
+#13a
 a.lm <- lm(Temp~Month + I(Month^2), data=airquality)
 summary(a.lm)
 ```
+```{r}
+14 d
+Which of the following graphs would support the statement that "the odds that Y = 1 increases by 20% for each 1 unit change in x"?
+  An increase in the odds of 20% per unit change in X is fairly substantial. Thus, we would be looking for a graph that is (1) increasing in "slope" from left to right and (2) that does so fairly sharply. The shallower a curve, the smaller the percentage increase in the odds. The steeper the curve, the greater the percentage increase in the odds.
+
+```
+
+
 
 ```{r}
-#`15
+#`15a
+#Suppose you are asked to help decide how wide (in centimeters) kid's shoes should be for kids with foot lengths of 25 centimeters. Suppose further you are provided with the KidsFeet dataset found in library(mosaic). Perform a regression that would help provide an answer to this question.
+
+Select the interval below that, according to your regression, should contain 95% of the widths of kids feet that are 25 centimeters long.
+#
 library(mosaic)
 ?KidsFeet
 kf.lm <- lm(width~length, data=KidsFeet)
@@ -105,19 +173,46 @@ predict(kf.lm, data.frame(length=25), interval = "prediction")
 ```
 
 ```{r}
-#16
+#16a
 c.lm <- lm(dist ~ speed, data=cars)
 predict(c.lm, data.frame(speed=14))
 80-37.47463
+
+The easiest way to locate this value is with the residual plot, which identifies the three largest residuals automatically.
+
+cars.lm <- lm(dist ~ speed, data=cars)
+
+plot(cars.lm, which=1)
+
+From that plot, you should notice that point 23 is in the same position as the orange dot in the plot of this question. Thus,
+
+cars.lm$residuals[23]
+
+42.52537
 ```
 
 ```{r}
-#17 didn't look like the others, I have no idea what a robust regression is
+#17a didn't look like the others, I have no idea what a robust regression is
+#Which regression from the options below would best fit the data for the scatterplot shown?
+#The lowess curve would best model this data in comparison to the other models, which would be inadequate to capture the "bends" in this data. If you are curious, this data was generated from the true model:
+
+X <- runif(30,0,50)
+
+Y <- 20000 - 800*X + 25*X^2 + -.03*X^3 + .005*X^4 - .0002*X^5 + rnorm(30,0,1000)
+
+plot(Y ~ X)
 
 ```
 
 ```{r}
-#18
+#18a
+#Return to the RailTrail data set in R.
+
+Perform an appropriate analysis that would allow you to predict the average volume of users on the trail by knowing the cloud cover measurement for a given day.
+
+Draw a graphic that includes the results of your analysis in the plot.
+
+Use your graphic to estimate the average volume for days with a cloud cover measurement of 8.
 ?RailTrail
 rt.lm <- lm(volume ~ cloudcover, data=RailTrail)
 ggplot(RailTrail, aes(x=cloudcover, y=volume)) + 
@@ -125,52 +220,120 @@ ggplot(RailTrail, aes(x=cloudcover, y=volume)) +
   geom_smooth(method="lm", se=F, formula=y~x) +
   scale_x_continuous(n.breaks = 10)
 
+###ans
+###> plot(volume ~ cloudcover, data=RailTrail)
+> abline(lm(volume ~ cloudcover, data=RailTrail))
+
+ 
+
+Then look at the plot above an x-value of 8. 
+
+> abline(v=8, lty=2) #if this helps your eyes, then use it.
+
+That corresponds to a y-value of about 343
+
+> abline(h=343, lty=2)
+
+ 
+
+To find the exact value, do some math:
+
+> summary(lm(volume ~ cloudcover, data=RailTrail))
+
+> 461.322 - 14.797*8 
+
+#answer: 342.946 which rounds to 343.
+
+Coefficients:
+                        Estimate Std. Error   t value        Pr(>|t|)
+(Intercept)         461.322     25.904     17.81      < 2e-16 ***
+cloudcover         -14.797       3.905     -3.79    0.000276 ***
+
 ```
 
 ```{r}
-#19
+#19a
 sum((-7.1)^2, 13^2, (-7.4)^2, 4.1^2, (-2.7)^2)#298.27
 sum((-8.7)^2, 11^2, (-8.6)^2, 3^2, (-3.6)^2)#292.61
 sum((-19.6)^2, 6.8^2, (-7.3)^2, 10.4^2, (-9.9)^2)#689.6
 ```
 
 ```{r}
-#20
-View(Marriage)
-?Marriage
-m.lm <- lm()
+#20a
+#View the Marriage data in R.
+
+This data set lists characteristics of 98 individuals (49 couples) at the time they were married. The age column lists the age of each individual. The prevcount column states how many times the individual was previously married prior to this marriage. So a prevcount of 2 means that person was previously married twice.
+
+Perform an analysis using this data that looks to see if the age of the individual at the time of marriage can predict if that person was previously married. 
+
+Then, suppose that Frank is getting married and is 27 years old. Based on your analysis, what is the probability that Frank was previously married?
+  
+  ans There is about a 32.3% chance that Frank was previously married.
+> myglm <- glm(prevcount > 0 ~ age, data=Marriage, family=binomial)
+> predict(myglm, data.frame(age=27), type="response")
+
+0.3232086
 
 ```
 
 ```{r}
-#21
+#21a
+#Run the following code in R.
+
+plot(time ~ age, data=TenMileRace, col=sex)
+
+Perform an appropriate analysis that would allow you to add two linear regression lines with the same slope to this plot. One line should be for the male's data, the other for the female's data. The common slope of the two lines should be 16.493.
+
+Based on the results of your analysis, by how much do the average times of males and females differ?
+#
 ?TenMileRace
-plot(time~age, data=TenMileRace, col=sex)
-lines.lm <- lm(time ~ age + sex, data=TenMileRace)
-summary(lines.lm)
-b <- coef(lines.lm)
-ggplot(TenMileRace, aes(x=age, y=time, color=sex)) + 
-  geom_point() + 
-  geom_smooth(method="lm", se=F, formula=y~x) +
-  stat_function(fun = function(x) b[1] + b[2]*x) +
-  stat_function(fun = function (x) (b[1] + b[3]) + b[2]*x)
+> mylm <- lm(time ~ age + sex, data=TenMileRace)
+> summary(mylm)
+
+Coefficients:
+                        Estimate    Std. Error    t value     Pr(>|t|)
+(Intercept)       5592.610        37.604    148.72    <2e-16 ***
+age                     16.493           1.013     16.28    <2e-16 ***
+sexM               -775.908         21.478    -36.13    <2e-16 ***
+---
+Signif. codes: 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 965.3 on 8633 degrees of freedom
+Multiple R-squared: 0.136, Adjusted R-squared: 0.1358
+F-statistic: 679.5 on 2 and 8633 DF, p-value: < 2.2e-16
+
+notice SexM is -775.908 women was the d
 ```
 
 ```{r}
-#22
-aq.lm <- lm(Ozone~Wind + Temp + Wind:Temp, data=airquality)
-summary(aq.lm)
-b <- coef(aq.lm)
-ggplot(airquality, aes(x=Wind, y=Ozone, color=Temp)) + 
-  geom_point() + 
-  geom_smooth(method="lm", se=F, formula=y~x) +
-  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x)
-  #stat_function(fun = function (x) (b[1] + b[3]) + (b[2]*x + b[4]*x))
+#22a
+#Use the airquality data set in R to perform a multiple regression of the following model.
 
+Y_i(oz) = B0 + B1X1(Wind) + B2X2(temp) + B3WindTemp + e
+Based on your results in R, which of the regression lines shown on the plot below represents the line for a Temp of 70 degrees?
+ans a
+mylm <- lm(Ozone ~ Wind + Temp + Wind:Temp, data=airquality)
+
+b <- coef(mylm)
+
+plot(Ozone ~ Wind, data=airquality, cex=(Temp/max(Temp))^3+.2, xlim=c(0,22))
+curve(b[1] + b[2]*x + b[3]*90 + b[4]*x*90, add=TRUE)
+curve(b[1] + b[2]*x + b[3]*80 + b[4]*x*80, add=TRUE)
+curve(b[1] + b[2]*x + b[3]*70 + b[4]*x*70, add=TRUE, col="blue")
+curve(b[1] + b[2]*x + b[3]*100 + b[4]*x*100, add=TRUE)
+text(1,29,"A")
+text(1,65,"B")
+text(1,105,"C")
+text(1,140,"D")
+points(c(18,18),c(140,160), cex=c((56/97)^3+.2,1.2))
+text(x=c(18,18),y=c(140,160), pos=4, c("56 deg","97 deg"))
 ```
 
+
+23 was b
+24 was d
 ```{r}
-#25
+#25 a
 mt.lm <- lm(mpg~hp, data=mtcars)
 summary(mt.lm)
 ggplot(mt.lm, aes(x=hp, y=mpg)) + 

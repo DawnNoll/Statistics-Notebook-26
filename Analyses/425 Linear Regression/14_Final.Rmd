@@ -1,0 +1,338 @@
+---
+title: "14_Final"
+output: html_document
+date: "2026-04-10"
+---
+
+```{r fig.height=4, fig.width=4}
+#1 100
+library(MASS)
+View(cats)
+?cats
+cats.lm <- lm(Hwt ~ Bwt, data=cats)
+summary(cats.lm)
+```
+
+
+```{r fig.height=4, fig.width=4}
+#2 0
+# figuring out a probability on a multiple logistic regression
+# if the regular is the exp(slope) I'll try (slope + int) since that's how it'd work for a linear regression
+# exp(beta0+beta1*x+beta2*)/(1+exp(beta0+beta1*x))
+# exp(-0.9992) e^b1 
+#a multiplier the odds
+
+1-0.3681739 but then 1-the for that one
+3.86370
+-0.02532
+-5.88493
+0.05708
+exp(-0.02532*50)*exp(0.05708*50)
+exp(-0.02532+0.05708)
+exp(3.86370-0.02532*50-5.88493+-5.88493*50)
+1-6.063772e-130
+```
+
+```{r fig.height=4, fig.width=4}
+#3 50
+library(mosaic)
+
+plot(ccf ~ thermsPerDay, data=Utilities)
+Ut.lm <- lm(ccf ~ thermsPerDay, data=Utilities)
+plot(Ut.lm, which=1:2)
+plot(Ut.lm$residuals)
+```
+
+```{r fig.height=4, fig.width=4}
+#4 0 predict on multiple regression
+?Utilities
+ut.lm.p <- lm(kwh ~ year + temp + year:temp, data=Utilities)
+summary(ut.lm.p)
+pander(summary(ut.lm.p))
+predict(ut.lm.p, data.frame(temp=60))
+63.94-1.151
+```
+
+
+```{r fig.height=4, fig.width=4}
+#5
+ut2.lm <- lm(temp ~ ccf, data=Utilities)
+
+boxCox(ut2.lm) # lambda =.5
+ut2t.lm <- lm(sqrt(temp) ~ ccf, data=Utilities)
+summary(ut2t.lm)
+b <- coef(ut2t.lm)
+# curve((8.523-0.021*x)^2, add=TRUE, col="skyblue")
+```
+
+```{r fig.height=4, fig.width=4}
+#6 50
+#Use the Utilities data set to fit a loess (degree=2, span=0.3) curve to the plot that predicts the "totalbill" based on the month of the year.
+#Use your loess curve to predict the total bill for September.
+ggplot(Utilities, aes(x=month, y=totalbill)) + 
+  geom_point() + 
+  geom_smooth(se=F, method="loess", method.args = list(degree=2), span=0.3) +
+  scale_x_continuous(n.breaks = 12) 
+
+mylo <- loess(totalbill~month, data=Utilities, span=0.3, degree=2)
+predict(mylo, data.frame(month=9))
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+# 7 100
+ggplot(airquality, aes(x=Ozone, y=Temp)) + 
+  geom_point() + 
+  geom_smooth(se=F, method="loess", method.args = list(degree=2), span=0.2)
+
+ggplot(airquality, aes(x=Ozone, y=Temp)) + 
+  geom_point() + 
+  geom_smooth(se=F, method="loess", method.args = list(degree=2), span=0.7)
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+#8 a or c 50
+plot(totalbill ~ gasbill, data=Utilities)
+abline(lm(totalbill ~ gasbill, data=Utilities))
+abline(v=150, lty=2) 
+
+utp.lm <- lm(totalbill~gasbill, data=Utilities)
+predict(utp.lm, data.frame(gasbill=150), interval="predict")
+# doesn't say average
+```
+
+
+```{r fig.height=4, fig.width=4}
+#9
+utr.lm <- lm(gasbill ~ ccf, data=Utilities)
+summary(utr.lm)
+
+```
+
+
+```{r fig.height=10, fig.width=10}
+#10
+pairs(airquality, panel.smooth=TRUE)
+ot.lm <- lm(Ozone~Temp, data=airquality)
+ow.lm <- lm(Ozone~Wind, data=airquality)
+wt.lm <- lm(Wind~Temp, data=airquality)
+sw.lm <- lm(Solar.R~Wind, data=airquality)
+summary(ot.lm)#.4877
+summary(ow.lm)#.3619
+summary(wt.lm)#.2098
+summary(sw.lm)#0.003225
+```
+
+```{r fig.height=10, fig.width=10}
+#11 ?? double check
+pairs(Utilities, panel=panel.smooth)
+ut.lm <- lm(totalbill~gasbill, data=Utilities)
+pairs(cbind(Res=ut.lm$res,Fit=ut.lm$fit,Utilities), panel=panel.smooth)
+# elecbill spot on
+
+```
+
+
+```{r fig.height=4, fig.width=4}
+#12
+uth.lm <- lm(elecbill~kwh, data=Utilities)
+summary(uth.lm)
+calculate_t_value <- function(estimate, std_error, number=0){
+  # number is the value from hypotheses eg. H0:B0=3)
+  (estimate - number)/std_error
+}
+
+calculate_p_value <- function(t_value, dof){
+  2*pt(-abs(t_value), dof)
+}
+
+calculate_t_value(0.108754, 0.005816, 0.11) #dof=115
+calculate_p_value(-0.2142366, 115)
+```
+
+```{r fig.height=4, fig.width=4}
+#13
+#You may find useful information on how to do this in the “Explanation” tab under “t Tests” from your Math 325 Notebook, Simple Linear Regression page.
+t_value <- calculate_t_value(1745, 67479, 1500)#intercept
+t_value
+calculate_p_value(t_value, 398)
+2*pt(-abs(t_value), 48)
+t_value <- calculate_t_value(43885, 3320, 35000)#slope
+t_value
+calculate_p_value(t_value, 398)
+confint(cl.lm)
+#b0 -130915.29 134404.41
+#b1 37357.77  50411.97
+I think this is the one with t* which I think is 1.981
+b1 +- t* Sb1 (standard error)
+0.2339 + 1.981*0.2524 #0.7339044
+0.2339 - 1.981*0.2524 #-0.2661044
+
+```
+
+
+```{r fig.height=4, fig.width=4}
+#14 ??
+utp2.lm <- lm(totalbill~kwh + ccf + year, data=Utilities)
+summary(utp2.lm)
+?Utilities
+pander(utp2.lm)
+0.7564
+```
+
+```{r }
+#15
+ut.lm <- lm(gasbill~thermsPerDay, data=Utilities)
+boxCox(ut.lm)
+ut.lm <- lm(sqrt(gasbill)~thermsPerDay, data=Utilities)
+summary(ut.lm)
+b <- coef(ut.lm)
+ggplot(Utilities, aes(x=thermsPerDay, y=gasbill)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)+
+  stat_function(fun=function(x) (b[1] + b[2]*x)^2)
+
+ut.lm <- lm(sqrt(sqrt(gasbill))~thermsPerDay, data=Utilities)
+summary(ut.lm)
+b <- coef(ut.lm)
+
+ggplot(Utilities, aes(x=thermsPerDay, y=gasbill)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)+
+  stat_function(fun=function(x) (b[1] + b[2]*x)^4)
+```
+
+```{r fig.height=4, fig.width=4}
+#16
+utq.lm <- lm(temp~month + I(month^2), data=Utilities)
+summary(utq.lm)
+b <- coef(utq.lm)
+ggplot(Utilities, aes(x=month, y=temp)) + 
+  geom_point() + 
+  stat_function(fun=function(x) b[1] + b[2]*x + b[3]*x^2)
+
+```
+
+```{r fig.height=4, fig.width=4}
+#17
+utc.lm <- lm(temp~month + I(month^2) + I(month^3), data=Utilities)
+summary(utc.lm)
+b <- coef(utc.lm)
+ggplot(Utilities, aes(x=month, y=temp)) + 
+  geom_point() + 
+  stat_function(fun=function(x) b[1] + b[2]*x + b[3]*x^2 + b[4]*x^3)
+
+```
+
+```{r fig.height=4, fig.width=4}
+#18 ?? Empty
+library(car)
+?Prestige
+Prestige2 <- mutate(Prestige, type = as.factor(ifelse(type == "prof", "prof","other")))
+p.lm <- lm(income~prestige + type + prestige:type, data=Prestige2)
+summary(p.lm)  
+  
+
+
+p.lm <- lm(income~prestige + prestige:type, data=Prestige2)
+summary(p.lm) 
+```
+
+```{r fig.height=4, fig.width=4}
+#19 ??
+
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+#20
+?Chile
+c.lm <- lm(income~population, data=Chile)
+summary(c.lm)
+pander(summary(c.lm))
+plot(c.lm, which=1:2)
+plot(c.lm$residuals)
+sqrt(0.04858)
+```
+
+```{r fig.height=4, fig.width=4}
+#21
+c.lm <- lm(dist ~ speed, data=cars)
+summary(c.lm) #rse = 15.38
+cars2 <- cars
+View(cars2)
+cars2$dist[16] <- 12
+c2.lm <- lm(dist ~ speed, data=cars2)
+summary(c2.lm) #15.65
+```
+
+```{r fig.height=4, fig.width=4}
+#22
+
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+#23 Cooks Empty
+
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+#24
+(85.7380 - 29.8786) + (-0.1187*150 + .2950*150)
+
+
+```
+
+```{r fig.height=4, fig.width=4}
+#25
+mt2.lm <- lm(mpg~wt, data=mtcars)
+summary(mt2.lm)
+
+
+mt.lm <- lm(mpg~wt, data=mtcars)
+summary(mt.lm)
+ggplot(mt.lm, aes(x=wt, y=mpg)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)
+plot(mt.lm, which=1)
+boxCox(mt.lm) #lambda = 0 or log
+
+?mtcars
+mt.lm.log <- lm(log(mpg)~wt, data=mtcars)
+summary(mt.lm.log)
+b <- coef(mt.lm.log)
+ggplot(mt.lm, aes(x=wt, y=mpg)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=F, formula=y~x)+
+  stat_function(fun=function(x) exp(b[1] + b[2]*x))
+plot(mt.lm, which=1)
+pred <- predict(mt.lm.log, data.frame(wt=205), 
+        interval="prediction")
+predict(mt.lm.log, data.frame(wt=2.05), interval="predict")
+exp(2.98608) # convert it back lower
+exp(3.56343)
+
+
+mt.lm <- lm(mpg~wt, data=mtcars)
+summary(mt.lm)
+
+# if you store the numbers you can index them
+# [1]=fit, [2]=lwr, [3]=upr in the plot
+pred <- predict(u.lm, data.frame(temp=30), 
+        interval="prediction")
+
+ggplot(mtcars, aes(x=wt, y=mpg)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=T, formula=y~x) + 
+  geom_segment(x=30, xend=30, y=pred[2], yend=pred[3],
+               color="red", alpha=0.01, lwd=4) + 
+  theme_classic()
+```
